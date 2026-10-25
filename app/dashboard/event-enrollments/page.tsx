@@ -1,18 +1,10 @@
 import { EventEnrollmentTable } from '@/features/event-enrollments/components/event-enrollment-table';
 import { DataLoadAlert } from '@/components/dashboard/data-load-alert';
 import { emptyEventEnrollments, safelyLoad } from '@/lib/dashboard/safe-data';
-import {
-  getEventEnrollments,
-  syncStaleEventEnrollmentSnapshots,
-} from '@/features/event-enrollments/data';
-
-async function getSyncedEventEnrollments() {
-  await syncStaleEventEnrollmentSnapshots();
-  return getEventEnrollments();
-}
+import { getEventEnrollments } from '@/features/event-enrollments/data';
 
 export default async function EventEnrollmentsPage() {
-  const enrollmentsResult = await safelyLoad(getSyncedEventEnrollments, emptyEventEnrollments);
+  const enrollmentsResult = await safelyLoad(getEventEnrollments, emptyEventEnrollments);
 
   return (
     <div className="space-y-8">

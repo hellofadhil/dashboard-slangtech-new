@@ -1,5 +1,6 @@
 import 'server-only';
 
+import { cache } from 'react';
 import { cookies } from 'next/headers';
 import { AUTH_REFRESH_COOKIE, AUTH_SESSION_COOKIE } from '@/lib/auth/session';
 import {
@@ -36,7 +37,7 @@ function getFirebaseApiKey(): string {
   return apiKey;
 }
 
-export async function verifyFirebaseIdToken(idToken: string): Promise<FirebaseSessionUser | null> {
+export const verifyFirebaseIdToken = cache(async function verifyFirebaseIdToken(idToken: string): Promise<FirebaseSessionUser | null> {
   const apiKey = getFirebaseApiKey();
 
   const response = await fetch(`https://identitytoolkit.googleapis.com/v1/accounts:lookup?key=${apiKey}`, {
@@ -63,7 +64,7 @@ export async function verifyFirebaseIdToken(idToken: string): Promise<FirebaseSe
     uid: user.localId,
     email,
   };
-}
+});
 
 export async function refreshFirebaseIdToken(refreshToken: string): Promise<{
   idToken: string;
@@ -100,7 +101,7 @@ export async function refreshFirebaseIdToken(refreshToken: string): Promise<{
   };
 }
 
-export async function ensureAdminAccess(user: FirebaseSessionUser): Promise<boolean> {
+export const ensureAdminAccess = cache(async function ensureAdminAccess(user: FirebaseSessionUser): Promise<boolean> {
   const adminCount = await getAdminUsersCount();
 
   if (adminCount === 0) {
@@ -109,7 +110,7 @@ export async function ensureAdminAccess(user: FirebaseSessionUser): Promise<bool
   }
 
   return isAdminEmailAllowed(user.email);
-}
+});
 
 export async function getAuthSessionToken(): Promise<string | undefined> {
   const cookieStore = await cookies();
@@ -121,7 +122,7 @@ export async function getAuthRefreshToken(): Promise<string | undefined> {
   return cookieStore.get(AUTH_REFRESH_COOKIE)?.value;
 }
 
-export async function getCurrentAdminUser(): Promise<FirebaseSessionUser | null> {
+export const getCurrentAdminUser = cache(async function getCurrentAdminUser(): Promise<FirebaseSessionUser | null> {
   const idToken = await getAuthSessionToken();
 
   if (!idToken) {
@@ -135,4 +136,4 @@ export async function getCurrentAdminUser(): Promise<FirebaseSessionUser | null>
 
   const hasAccess = await ensureAdminAccess(user);
   return hasAccess ? user : null;
-}
+});
