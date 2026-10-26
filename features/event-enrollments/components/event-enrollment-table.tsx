@@ -85,18 +85,25 @@ function getStatusTone(status: EventEnrollmentStatus): 'green' | 'red' | 'orange
 
 function getPaymentLabel(enrollment: EventEnrollment): string {
   if (enrollment.payment.method === 'free') {
-    return 'Free';
+    return 'Gratis';
   }
 
   if (enrollment.payment.method === 'manual') {
-    return enrollment.payment.status === 'paid' ? 'Manual - paid' : 'Manual - menunggu';
+    return enrollment.payment.status === 'paid' ? 'Transfer Manual (Lunas)' : 'Transfer Manual (Menunggu)';
   }
 
-  return `Gateway - ${enrollment.payment.status}`;
+  const gatewayStatusMap: Record<string, string> = {
+    paid: 'Otomatis (Lunas)',
+    pending: 'Otomatis (Diproses)',
+    failed: 'Otomatis (Gagal)',
+    expired: 'Otomatis (Kedaluwarsa)',
+  };
+
+  return gatewayStatusMap[enrollment.payment.status] || `Otomatis (${enrollment.payment.status})`;
 }
 
 function getPaymentAmount(enrollment: EventEnrollment): string {
-  return enrollment.payment.method === 'free' ? 'Free' : formatRupiah(enrollment.payment.amount);
+  return enrollment.payment.method === 'free' ? 'Gratis' : formatRupiah(enrollment.payment.amount);
 }
 
 function EventEnrollmentStatusBadge({ status }: { status: EventEnrollmentStatus }) {
@@ -125,9 +132,9 @@ export function EventEnrollmentTable({ enrollments }: EventEnrollmentTableProps)
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Daftar Event Enrollments</CardTitle>
+        <CardTitle>Daftar Pendaftaran Event</CardTitle>
         <CardDescription>
-          Enrollment event disimpan terpisah dari enrollment kelas agar alur pembayaran dan jadwal tidak bentrok.
+          Pantau data peserta, status pembayaran tiket, dan jadwal pelaksanaan event.
         </CardDescription>
       </CardHeader>
       <CardContent className="space-y-4">
@@ -137,15 +144,15 @@ export function EventEnrollmentTable({ enrollments }: EventEnrollmentTableProps)
             value={search}
             onChange={(event) => setSearch(event.target.value)}
             className="pl-9"
-            placeholder="Cari nama siswa, email, event, slug, atau trainer"
+            placeholder="Cari nama peserta, email, judul event, atau pemateri"
           />
         </div>
 
         {filteredEnrollments.length === 0 ? (
           <div className="rounded-lg border border-dashed py-12 text-center">
-            <p className="font-medium">Event enrollment tidak ditemukan</p>
+            <p className="font-medium">Pendaftaran event tidak ditemukan</p>
             <p className="mt-1 text-sm text-muted-foreground">
-              Data akan muncul dari collection eventEnrollments.
+              Belum ada data pendaftaran yang sesuai dengan pencarian ini.
             </p>
           </div>
         ) : (

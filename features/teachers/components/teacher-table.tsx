@@ -4,7 +4,8 @@ import { useEffect, useMemo, useState, useTransition } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { Eye, Plus, Search, Trash2 } from 'lucide-react';
 import { toast } from 'sonner';
-import { createTeacherAction, deleteTeacherAction } from '@/features/teachers/actions';
+import { deleteTeacherAction } from '@/features/teachers/actions';
+import { TeacherCreateDialog } from '@/features/teachers/components/teacher-create-dialog';
 import type { Teacher, TeacherQuery } from '@/features/teachers/types';
 import {
   AlertDialog,
@@ -95,54 +96,10 @@ export function TeacherTable({ teachers, filters }: TeacherTableProps) {
   const [detailTarget, setDetailTarget] = useState<Teacher | null>(null);
   const [deleteTarget, setDeleteTarget] = useState<Teacher | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
-  const [createUsername, setCreateUsername] = useState('');
-  const [createPassword, setCreatePassword] = useState('');
-  const [createError, setCreateError] = useState('');
-  const [isCreating, setIsCreating] = useState(false);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
-
-  const handleCreateTeacher = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!createUsername.trim()) {
-      setCreateError('Username atau email guru wajib diisi');
-      return;
-    }
-    if (createPassword.length < 6) {
-      setCreateError('Password minimal 6 karakter');
-      return;
-    }
-
-    setCreateError('');
-    setIsCreating(true);
-
-    try {
-      const result = await createTeacherAction({
-        username: createUsername.trim(),
-        password: createPassword,
-      });
-
-      if (!result.success) {
-        setCreateError(result.message);
-        toast.error(result.message);
-        return;
-      }
-
-      toast.success(result.message || 'Akun guru berhasil dibuat');
-      setCreateUsername('');
-      setCreatePassword('');
-      setCreateOpen(false);
-      router.refresh();
-    } catch (error) {
-      const msg = error instanceof Error ? error.message : 'Gagal membuat akun guru';
-      setCreateError(msg);
-      toast.error(msg);
-    } finally {
-      setIsCreating(false);
-    }
-  };
   const filteredTeachers = useMemo(() => filterTeachers(items, filters), [items, filters]);
   const totalPages = Math.max(Math.ceil(filteredTeachers.length / TEACHER_PAGE_SIZE), 1);
   const currentPage = Math.min(page, totalPages);
@@ -372,22 +329,22 @@ export function TeacherTable({ teachers, filters }: TeacherTableProps) {
           <DialogHeader>
             <DialogTitle>Detail Guru</DialogTitle>
             <DialogDescription>
-              Data profil akun guru. Data profil dilengkapi sendiri oleh guru setelah login di website client.
+              Informasi akun dan data profil lengkap guru.
             </DialogDescription>
           </DialogHeader>
 
           {detailTarget ? (
             <div className="space-y-5">
               <div className="grid gap-4 md:grid-cols-2">
-                <ReadOnlyField label="Nama Lengkap" value={detailTarget.fullName || '(Belum dilengkapi oleh guru)'} />
+                <ReadOnlyField label="Nama Lengkap" value={detailTarget.fullName || '(Belum diisi)'} />
                 <ReadOnlyField label="Username / Nickname" value={detailTarget.nickname || detailTarget.username || '-'} />
                 <ReadOnlyField label="Email Akun" value={detailTarget.email} />
-                <ReadOnlyField label="Nomor Telepon" value={detailTarget.phoneNumber || '(Belum dilengkapi)'} />
+                <ReadOnlyField label="Nomor Telepon" value={detailTarget.phoneNumber || '(Belum diisi)'} />
                 <ReadOnlyField
                   label="Status Profil"
-                  value={detailTarget.isProfileComplete ? 'Sudah Lengkap' : 'Belum Lengkap (perlu dilengkapi di client)'}
+                  value={detailTarget.isProfileComplete ? 'Lengkap' : 'Belum Lengkap'}
                 />
-                <ReadOnlyField label="Pendidikan Terakhir" value={detailTarget.lastEducation || '(Belum dilengkapi)'} />
+                <ReadOnlyField label="Pendidikan Terakhir" value={detailTarget.lastEducation || '(Belum diisi)'} />
                 <ReadOnlyField label="Tempat Lahir" value={detailTarget.birthPlace || '-'} />
                 <ReadOnlyField label="Tanggal Lahir" value={detailTarget.birthDate || '-'} />
                 <ReadOnlyField label="Pengalaman Mengajar" value={`${detailTarget.experienceYears || 0} Tahun`} />
@@ -402,7 +359,7 @@ export function TeacherTable({ teachers, filters }: TeacherTableProps) {
 
               <div className="grid gap-4 md:grid-cols-2">
                 <div className="md:col-span-2">
-                  <ReadOnlyArea label="Alamat Lengkap" value={formatAddress(detailTarget) || '(Belum dilengkapi oleh guru)'} rows={3} />
+                  <ReadOnlyArea label="Alamat Lengkap" value={formatAddress(detailTarget) || '(Belum diisi)'} rows={3} />
                 </div>
                 <ReadOnlyField label="Jalan" value={detailTarget.address.street || '-'} />
                 <ReadOnlyField label="Provinsi" value={detailTarget.address.provinceName || '-'} />
@@ -421,89 +378,26 @@ export function TeacherTable({ teachers, filters }: TeacherTableProps) {
         </DialogContent>
       </Dialog>
 
-      <Dialog open={createOpen} onOpenChange={(open) => {
-        if (!open && !isCreating) {
-          setCreateOpen(false);
-          setCreateError('');
-        }
-      }}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle>Tambah Guru Baru</DialogTitle>
-            <DialogDescription>
-              Buat akun guru baru hanya dengan username dan password. Data lainnya akan dilengkapi oleh guru di website client.
-            </DialogDescription>
-          </DialogHeader>
-
-          <form onSubmit={handleCreateTeacher} className="space-y-4">
-            {createError ? (
-              <div className="rounded-md border border-destructive/30 bg-destructive/10 px-3 py-2 text-sm font-medium text-destructive">
-                {createError}
-              </div>
-            ) : null}
-
-            <div className="space-y-2">
-              <Label htmlFor="create-username">Username atau Email Guru</Label>
-              <Input
-                id="create-username"
-                value={createUsername}
-                onChange={(e) => setCreateUsername(e.target.value)}
-                placeholder="misal: guru_budi atau budi@example.com"
-                disabled={isCreating}
-                autoComplete="off"
-                required
-              />
-              <p className="text-xs text-muted-foreground">
-                Guru dapat login di website client menggunakan username atau email ini.
-              </p>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="create-password">Password</Label>
-              <Input
-                id="create-password"
-                type="password"
-                value={createPassword}
-                onChange={(e) => setCreatePassword(e.target.value)}
-                placeholder="Minimal 6 karakter"
-                disabled={isCreating}
-                required
-              />
-              <p className="text-xs text-muted-foreground">
-                Password awal untuk login guru pertama kali.
-              </p>
-            </div>
-
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setCreateOpen(false)}
-                disabled={isCreating}
-              >
-                Batal
-              </Button>
-              <Button type="submit" disabled={isCreating}>
-                {isCreating ? 'Membuat Akun...' : 'Buat Akun Guru'}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <TeacherCreateDialog
+        open={createOpen}
+        onOpenChange={setCreateOpen}
+        onSuccess={() => {
+          router.refresh();
+        }}
+      />
 
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Hapus Guru?</AlertDialogTitle>
+            <AlertDialogTitle>Hapus Akun Guru?</AlertDialogTitle>
             <AlertDialogDescription>
-              {getTeacherName(deleteTarget)} akan dihapus dari daftar guru dan tidak bisa menggunakan akun ini lagi.
-              Tindakan ini tidak bisa dibatalkan.
+              Akun guru untuk {getTeacherName(deleteTarget)} akan dihapus dari sistem dan tidak dapat login kembali. Tindakan ini tidak dapat dibatalkan.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isPending}>Batal</AlertDialogCancel>
             <AlertDialogAction onClick={handleDelete} disabled={isPending}>
-              {isPending ? 'Menghapus...' : 'Ya, Hapus Guru'}
+              {isPending ? 'Menghapus...' : 'Ya, Hapus Akun Guru'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

@@ -112,7 +112,7 @@ export function PaymentReviewPanel({ enrollment }: PaymentReviewPanelProps) {
         <CardHeader className="gap-3">
           <div>
             <CardTitle>Pembayaran</CardTitle>
-            <CardDescription>Review metode pembayaran, nominal, dan bukti transfer siswa.</CardDescription>
+            <CardDescription>Verifikasi metode pembayaran, nominal, dan bukti transfer siswa.</CardDescription>
           </div>
           <PaymentStatusBadge status={payment.status} />
         </CardHeader>
@@ -121,8 +121,8 @@ export function PaymentReviewPanel({ enrollment }: PaymentReviewPanelProps) {
             <DetailItem label="Metode" value={payment.method === 'manual' ? 'Transfer Manual' : 'Pembayaran Otomatis'} />
             <DetailItem label="Status" value={<PaymentStatusBadge status={payment.status} />} />
             <DetailItem label="Nominal" value={formatRupiah(payment.amount)} />
-            <DetailItem label="Currency" value={payment.currency} />
-            {payment.reviewedAt ? <DetailItem label="Direview Pada" value={formatDashboardDate(payment.reviewedAt)} /> : null}
+            <DetailItem label="Mata Uang" value={payment.currency} />
+            {payment.reviewedAt ? <DetailItem label="Diverifikasi Pada" value={formatDashboardDate(payment.reviewedAt)} /> : null}
             {payment.adminNote ? <DetailItem label="Catatan Admin" value={<p className="whitespace-pre-line font-normal">{payment.adminNote}</p>} /> : null}
           </div>
 
@@ -132,7 +132,19 @@ export function PaymentReviewPanel({ enrollment }: PaymentReviewPanelProps) {
                 <DetailItem label="Bank" value={payment.manual.bankName || '-'} />
                 <DetailItem label="Nomor Rekening" value={payment.manual.accountNumber || '-'} />
                 <DetailItem label="Nama Rekening" value={payment.manual.accountHolderName || '-'} />
-                <DetailItem label="Upload Bukti" value={formatDashboardDate(payment.manual.uploadedAt)} />
+                <DetailItem label="Waktu Unggah Bukti" value={formatDashboardDate(payment.manual.uploadedAt)} />
+                {payment.manual.senderBankName || payment.manual.senderAccountName ? (
+                  <>
+                    <DetailItem
+                      label="Bank / E-Wallet Pengirim"
+                      value={payment.manual.senderBankName || '-'}
+                    />
+                    <DetailItem
+                      label="Nama Rekening Pengirim"
+                      value={payment.manual.senderAccountName || '-'}
+                    />
+                  </>
+                ) : null}
               </div>
 
               {payment.manual.proofUrl ? (

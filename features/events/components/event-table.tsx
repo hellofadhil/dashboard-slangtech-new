@@ -159,8 +159,8 @@ export function EventTable({ events, filters }: EventTableProps) {
       <Card>
         <CardHeader className="gap-4">
           <div>
-            <CardTitle>Daftar Event</CardTitle>
-            <CardDescription>Kelola event, trainer, sesi, narahubung, harga, dan status publikasi.</CardDescription>
+            <CardTitle>Daftar Event & Workshop</CardTitle>
+            <CardDescription>Kelola workshop, sesi pemateri, narahubung, tiket, dan status publikasi.</CardDescription>
           </div>
           <CardAction>
             <Button asChild>
@@ -179,22 +179,22 @@ export function EventTable({ events, filters }: EventTableProps) {
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 className="pl-9"
-                placeholder="Cari nama event, slug, trainer, atau narahubung"
+                placeholder="Cari nama event, pemateri, atau narahubung..."
               />
             </div>
             <Select value={filters.priceType ?? 'all'} onValueChange={(value) => updateQuery({ priceType: value as EventQuery['priceType'] })}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Semua harga" />
+                <SelectValue placeholder="Semua Tiket" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">Semua Harga</SelectItem>
-                <SelectItem value="free">Free</SelectItem>
+                <SelectItem value="all">Semua Tiket</SelectItem>
+                <SelectItem value="free">Gratis</SelectItem>
                 <SelectItem value="paid">Berbayar</SelectItem>
               </SelectContent>
             </Select>
             <Select value={filters.status ?? 'all'} onValueChange={(value) => updateQuery({ status: value as EventQuery['status'] })}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Semua status" />
+                <SelectValue placeholder="Semua Status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Semua Status</SelectItem>

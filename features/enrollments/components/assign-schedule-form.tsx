@@ -331,16 +331,16 @@ export function AssignScheduleForm({ enrollment }: AssignScheduleFormProps) {
 
         <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
           <div className="space-y-2">
-            <Label htmlFor="teacher-name">Nama teacher</Label>
+            <Label htmlFor="teacher-name">Nama Guru / Pengajar</Label>
             <Input
               id="teacher-name"
               value={teacherName}
               onChange={(event) => setTeacherName(event.target.value)}
-              placeholder="Nama teacher"
+              placeholder="Nama guru pengajar"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="location-type">Tipe lokasi</Label>
+            <Label htmlFor="location-type">Tipe Lokasi</Label>
             <Select value={locationType} onValueChange={(value) => setLocationType(value as ScheduleLocationType)}>
               <SelectTrigger id="location-type" className="w-full">
                 <SelectValue />
@@ -352,7 +352,7 @@ export function AssignScheduleForm({ enrollment }: AssignScheduleFormProps) {
             </Select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="location-label">Label lokasi</Label>
+            <Label htmlFor="location-label">Nama Tempat / Platform</Label>
             <Input
               id="location-label"
               value={locationLabel}
@@ -362,7 +362,7 @@ export function AssignScheduleForm({ enrollment }: AssignScheduleFormProps) {
           </div>
           {locationType === 'online' ? (
             <div className="space-y-2">
-            <Label htmlFor="meeting-url">Meeting URL</Label>
+            <Label htmlFor="meeting-url">Tautan Meeting (URL)</Label>
               <Input
                 id="meeting-url"
                 value={meetingUrl}

@@ -226,14 +226,14 @@ export function RescheduleRequestPanel({ enrollment }: RescheduleRequestPanelPro
         <CardHeader className="gap-3">
           <div>
             <CardTitle>Permintaan Jadwal</CardTitle>
-            <CardDescription>Review request perubahan jadwal dari siswa.</CardDescription>
+            <CardDescription>Tinjau permohonan perubahan jadwal belajar dari siswa.</CardDescription>
           </div>
           {request ? <RescheduleRequestStatusBadge status={request.status} /> : null}
         </CardHeader>
         <CardContent className="space-y-6">
           {!request ? (
             <div className="rounded-lg border border-dashed p-6 text-sm text-muted-foreground">
-              Belum ada request reschedule untuk enrollment ini.
+              Belum ada permohonan perubahan jadwal untuk pendaftaran ini.
             </div>
           ) : (
             <>
@@ -241,7 +241,7 @@ export function RescheduleRequestPanel({ enrollment }: RescheduleRequestPanelPro
                 <DetailItem label="Diminta Pada" value={formatDashboardDate(request.requestedAt)} />
                 <DetailItem label="Sesi" value={targetSession ? `${targetSession.title} (#${targetSession.sessionNumber})` : request.targetSessionId} />
                 <DetailItem label="Status" value={<RescheduleRequestStatusBadge status={request.status} />} />
-                {request.reviewedAt ? <DetailItem label="Direview Pada" value={formatDashboardDate(request.reviewedAt)} /> : null}
+                {request.reviewedAt ? <DetailItem label="Ditinjau Pada" value={formatDashboardDate(request.reviewedAt)} /> : null}
               </div>
 
               {targetSession ? (
@@ -341,19 +341,19 @@ export function RescheduleRequestPanel({ enrollment }: RescheduleRequestPanelPro
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="reschedule-admin-note">Catatan admin</Label>
+                    <Label htmlFor="reschedule-admin-note">Catatan Admin</Label>
                     <Textarea
                       id="reschedule-admin-note"
                       value={adminNote}
                       onChange={(event) => setAdminNote(event.target.value)}
-                      placeholder="Catatan untuk siswa dan audit internal"
+                      placeholder="Tuliskan catatan atau alasan keputusan untuk siswa..."
                       rows={4}
                     />
                   </div>
 
                   {isPending ? (
                     <div className="rounded-lg border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-                      Memproses request reschedule...
+                      Memproses permintaan jadwal ulang...
                     </div>
                   ) : null}
 

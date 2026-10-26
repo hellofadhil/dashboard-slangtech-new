@@ -98,48 +98,48 @@ function getPrimaryWorkflowTab(filter: EnrollmentListFilter): PrimaryWorkflowTab
 function getWorkflowCopy(filter: EnrollmentListFilter): { title: string; description: string; empty: string } {
   if (filter === 'all') {
     return {
-      title: 'Semua Class Enrollments',
-      description: 'Semua enrollment kelas dari Firestore, termasuk yang sudah paid, completed, cancelled, atau menunggu review.',
-      empty: 'Belum ada class enrollment.',
+      title: 'Semua Pendaftaran Kelas',
+      description: 'Seluruh riwayat pendaftaran kelas siswa, baik yang sudah lunas, selesai, dibatalkan, maupun menunggu verifikasi.',
+      empty: 'Belum ada data pendaftaran kelas.',
     };
   }
 
   if (filter === 'payment_review_gateway') {
     return {
       title: 'Pembayaran Otomatis',
-      description: 'Pantau status transaksi gateway yang masih menunggu sistem, gagal, expired, atau belum sinkron ke enrollment.',
-      empty: 'Tidak ada pembayaran otomatis yang perlu dipantau.',
+      description: 'Pantau transaksi otomatis yang sedang diproses, berhasil, gagal, atau kedaluwarsa.',
+      empty: 'Tidak ada transaksi otomatis yang perlu dipantau.',
     };
   }
 
   if (filter === 'paid_enrollments') {
     return {
       title: 'Pembayaran Berhasil',
-      description: 'Daftar siswa yang sudah paid dan enrollment-nya sudah terkonfirmasi.',
-      empty: 'Belum ada pembayaran berhasil pada filter ini.',
+      description: 'Daftar siswa yang pembayarannya telah terverifikasi dan status pendaftarannya aktif.',
+      empty: 'Belum ada pendaftaran dengan pembayaran berhasil.',
     };
   }
 
   if (filter === 'need_schedule_assignment') {
     return {
       title: 'Atur Jadwal',
-      description: 'Siswa yang sudah bayar tapi belum memiliki jadwal belajar.',
-      empty: 'Tidak ada siswa yang perlu dibuatkan jadwal.',
+      description: 'Daftar siswa yang sudah lunas namun belum ditentukan jadwal belajarnya.',
+      empty: 'Tidak ada siswa yang menunggu penjadwalan.',
     };
   }
 
   if (filter === 'reschedule_requested') {
     return {
-      title: 'Permintaan Jadwal',
-      description: 'Request perubahan jadwal dari siswa yang menunggu review admin.',
-      empty: 'Tidak ada permintaan jadwal yang menunggu review.',
+      title: 'Permintaan Ganti Jadwal',
+      description: 'Permohonan perubahan jadwal sesi belajar dari siswa yang perlu ditinjau admin.',
+      empty: 'Tidak ada permohonan perubahan jadwal saat ini.',
     };
   }
 
   return {
     title: 'Transfer Manual',
-    description: 'Bukti transfer yang sudah diunggah siswa dan perlu dicek admin.',
-    empty: 'Tidak ada transfer manual yang perlu dicek.',
+    description: 'Bukti transfer pembayaran yang diunggah siswa dan menunggu verifikasi admin.',
+    empty: 'Tidak ada bukti transfer yang perlu diverifikasi.',
   };
 }
 
@@ -175,7 +175,7 @@ function getPaymentDate(enrollment: ClassEnrollment): string {
 
 function getGatewayStatusLabel(enrollment: ClassEnrollment): string {
   if (enrollment.payment.status === 'paid') {
-    return 'Pembayaran berhasil dari sistem';
+    return 'Pembayaran lunas';
   }
 
   if (enrollment.payment.status === 'failed') {
@@ -183,10 +183,10 @@ function getGatewayStatusLabel(enrollment: ClassEnrollment): string {
   }
 
   if (enrollment.payment.status === 'expired') {
-    return 'Pembayaran expired';
+    return 'Pembayaran kedaluwarsa';
   }
 
-  return 'Menunggu konfirmasi sistem';
+  return 'Sedang diproses';
 }
 
 function getPendingRequest(enrollment: ClassEnrollment) {

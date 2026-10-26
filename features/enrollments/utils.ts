@@ -12,9 +12,9 @@ export const ENROLLMENTS_COLLECTION = 'enrollments';
 export const DEFAULT_TIMEZONE = 'Asia/Jakarta';
 
 export const manualPaymentAccount = {
-  bankName: 'Bank BCA',
-  accountNumber: '1011811944',
-  accountHolderName: 'Hannan Azka Tuminem',
+  bankName: 'Bank Syariah Indonesia (BSI)',
+  accountNumber: '7359003662',
+  accountHolderName: 'PT SLANG TECH INDONESIA',
 } as const;
 
 export type StatusTone = 'green' | 'red' | 'orange' | 'gray' | 'blue' | 'purple' | 'yellow';
@@ -67,11 +67,11 @@ export function getEnrollmentStatusLabel(status: EnrollmentStatus): string {
 
 export function getPaymentStatusLabel(status: PaymentStatus): string {
   const labels: Record<PaymentStatus, string> = {
-    waiting_confirmation: 'Menunggu Dicek',
-    pending: 'Menunggu Sistem',
-    paid: 'Berhasil',
+    waiting_confirmation: 'Menunggu Verifikasi',
+    pending: 'Diproses',
+    paid: 'Lunas',
     failed: 'Gagal',
-    expired: 'Expired',
+    expired: 'Kedaluwarsa',
   };
 
   return labels[status];

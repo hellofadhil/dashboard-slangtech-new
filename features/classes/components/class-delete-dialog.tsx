@@ -27,11 +27,9 @@ export function ClassDeleteDialog({
     <AlertDialog open={!!classItem} onOpenChange={onOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Hapus Kelas?</AlertDialogTitle>
+          <AlertDialogTitle>Hapus Program Kelas?</AlertDialogTitle>
           <AlertDialogDescription>
-            Kelas {classItem?.name.id ?? classItem?.name.en} akan dihapus dari Firestore.
-            Gambar yang terkait akan dibersihkan dari R2 memakai utilitas upload yang sudah ada.
-            Tindakan ini tidak bisa dibatalkan.
+            Program kelas {classItem?.name.id ?? classItem?.name.en} beserta data pendukungnya akan dihapus permanen dari sistem. Tindakan ini tidak dapat dibatalkan.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

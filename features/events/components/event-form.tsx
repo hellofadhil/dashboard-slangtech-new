@@ -443,7 +443,7 @@ export function EventForm({ eventItem }: EventFormProps) {
         <Card>
           <CardHeader>
             <CardTitle>Harga</CardTitle>
-            <CardDescription>Event gratis otomatis tidak membutuhkan upload bukti pembayaran.</CardDescription>
+            <CardDescription>Peserta event gratis dapat langsung terdaftar tanpa verifikasi pembayaran.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2">
             <FormField
@@ -571,8 +571,8 @@ export function EventForm({ eventItem }: EventFormProps) {
 
         <Card>
           <CardHeader>
-            <CardTitle>Trainer</CardTitle>
-            <CardDescription>Tambahkan satu atau lebih trainer dengan pola chip input.</CardDescription>
+            <CardTitle>Trainer / Pemateri</CardTitle>
+            <CardDescription>Tambahkan satu atau lebih nama pemateri atau trainer untuk event ini.</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <FormField
@@ -651,7 +651,7 @@ export function EventForm({ eventItem }: EventFormProps) {
         <Card>
           <CardHeader>
             <CardTitle>Status Event</CardTitle>
-            <CardDescription>Kontrol publikasi dan kurasi event di dashboard.</CardDescription>
+            <CardDescription>Atur status publikasi dan ketersediaan pendaftaran event.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2">
             <FormField

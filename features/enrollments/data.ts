@@ -240,6 +240,8 @@ function normalizeManualPaymentDetails(value: unknown): ManualPaymentDetails {
     bankName: asString(data.bankName, manualPaymentAccount.bankName),
     accountNumber: asString(data.accountNumber, manualPaymentAccount.accountNumber),
     accountHolderName: asString(data.accountHolderName, manualPaymentAccount.accountHolderName),
+    senderBankName: asString(data.senderBankName) || undefined,
+    senderAccountName: asString(data.senderAccountName) || undefined,
     proofUrl: asString(data.proofUrl),
     proofFileName: asString(data.proofFileName),
     proofContentType: asString(data.proofContentType),

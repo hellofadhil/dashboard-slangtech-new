@@ -21,6 +21,8 @@ export type ManualPaymentDetails = {
   bankName: string;
   accountNumber: string;
   accountHolderName: string;
+  senderBankName?: string;
+  senderAccountName?: string;
   proofUrl: string;
   proofFileName: string;
   proofContentType: string;

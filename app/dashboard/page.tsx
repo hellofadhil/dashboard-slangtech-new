@@ -52,22 +52,22 @@ export default async function DashboardPage() {
     <div className="space-y-8">
       <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Dashboard</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Ringkasan</h1>
           <p className="mt-2 max-w-3xl text-muted-foreground">
-            Monitor classes, events, students, enrollments, payments, schedules, and operational tasks.
+            Pantau aktivitas program kelas, event, siswa, pendaftaran, pembayaran, dan jadwal belajar.
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <Button variant="outline" asChild>
             <Link href="/dashboard/events/new">
               <CalendarDays className="mr-2 h-4 w-4" />
-              Add Event
+              Tambah Event
             </Link>
           </Button>
           <Button asChild>
             <Link href="/dashboard/classes/new">
               <GraduationCap className="mr-2 h-4 w-4" />
-              Add Class
+              Tambah Kelas
             </Link>
           </Button>
         </div>
@@ -75,57 +75,57 @@ export default async function DashboardPage() {
 
       <DataLoadAlert
         message={summaryResult.error
-          ? `Unable to load dashboard data. ${summaryResult.error}`
+          ? `Gagal memuat ringkasan data dashboard. ${summaryResult.error}`
           : null}
       />
 
       <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <MetricCard
-          label="Total Students"
+          label="Total Siswa"
           value={summary.students.total}
-          helper={`+${summary.students.newThisMonth} this month`}
+          helper={`+${summary.students.newThisMonth} siswa baru bulan ini`}
           icon={<UsersRound className="h-4 w-4" />}
         />
         <MetricCard
-          label="Active Classes"
+          label="Kelas Aktif"
           value={summary.classes.active}
-          helper={`${summary.classes.total} total classes`}
+          helper={`${summary.classes.total} total kelas`}
           icon={<GraduationCap className="h-4 w-4" />}
         />
         <MetricCard
-          label="Active Events"
+          label="Event Aktif"
           value={summary.events.active}
-          helper={`${summary.events.upcoming} upcoming events`}
+          helper={`${summary.events.upcoming} event mendatang`}
           icon={<CalendarDays className="h-4 w-4" />}
         />
         <MetricCard
-          label="Pending Class Enrollments"
+          label="Pendaftaran Menunggu"
           value={summary.enrollments.pending}
-          helper={`${summary.enrollments.active} active class enrollments`}
+          helper={`${summary.enrollments.active} pendaftaran aktif`}
           icon={<ClipboardClock className="h-4 w-4" />}
         />
         <MetricCard
-          label="Pending Payments"
+          label="Verifikasi Pembayaran"
           value={summary.payments.pending}
-          helper={`${summary.payments.pendingManualReview} proofs need review`}
+          helper={`${summary.payments.pendingManualReview} bukti transfer perlu dicek`}
           icon={<Banknote className="h-4 w-4" />}
         />
         <MetricCard
-          label="Revenue This Month"
+          label="Pendapatan Bulan Ini"
           value={formatCurrencyIDR(summary.payments.revenueThisMonth)}
-          helper={`${summary.payments.paidThisMonth} paid payments`}
+          helper={`${summary.payments.paidThisMonth} transaksi lunas`}
           icon={<Banknote className="h-4 w-4" />}
         />
         <MetricCard
-          label="Today's Schedules"
+          label="Jadwal Hari Ini"
           value={summary.schedules.today}
-          helper={`${summary.schedules.upcomingThisWeek} upcoming this week`}
+          helper={`${summary.schedules.upcomingThisWeek} jadwal minggu ini`}
           icon={<CalendarClock className="h-4 w-4" />}
         />
         <MetricCard
-          label="Pending Reschedules"
+          label="Permintaan Ganti Jadwal"
           value={summary.rescheduleRequests.pending}
-          helper={`${summary.rescheduleRequests.approvedThisMonth} approved this month`}
+          helper={`${summary.rescheduleRequests.approvedThisMonth} disetujui bulan ini`}
           icon={<RefreshCw className="h-4 w-4" />}
         />
       </div>

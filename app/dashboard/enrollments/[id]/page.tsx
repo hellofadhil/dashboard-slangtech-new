@@ -66,7 +66,7 @@ function getNextAction(enrollment: ClassEnrollment): string {
   const request = enrollment.schedule?.rescheduleRequest;
 
   if (payment.method === 'manual' && payment.status === 'waiting_confirmation') {
-    return 'Review bukti transfer';
+    return 'Verifikasi bukti transfer';
   }
 
   if (payment.method === 'payment_gateway' && payment.status !== 'paid') {
@@ -82,7 +82,7 @@ function getNextAction(enrollment: ClassEnrollment): string {
   }
 
   if (request?.status === 'pending_admin_approval') {
-    return 'Review permintaan jadwal';
+    return 'Tinjau permintaan jadwal';
   }
 
   if (enrollment.schedule?.status === 'assigned') {
@@ -90,10 +90,10 @@ function getNextAction(enrollment: ClassEnrollment): string {
   }
 
   if (enrollment.status === 'completed' || enrollment.schedule?.status === 'completed') {
-    return 'Enrollment selesai';
+    return 'Pendaftaran selesai';
   }
 
-  return 'Review status enrollment';
+  return 'Periksa status pendaftaran';
 }
 
 function getPaymentMethodLabel(enrollment: ClassEnrollment): string {
@@ -115,7 +115,7 @@ function getActivityItems(enrollment: ClassEnrollment): Array<{
     {
       key: 'created',
       at: enrollment.createdAt,
-      title: 'Enrollment dibuat',
+      title: 'Pendaftaran dibuat',
       description: `${getStudentDisplayName(enrollment)} mendaftar ke ${getClassDisplayName(enrollment)}.`,
     },
   ];
@@ -133,10 +133,10 @@ function getActivityItems(enrollment: ClassEnrollment): Array<{
     items.push({
       key: 'payment-reviewed',
       at: enrollment.payment.reviewedAt,
-      title: enrollment.payment.status === 'paid' ? 'Pembayaran disetujui' : 'Pembayaran direview',
+      title: enrollment.payment.status === 'paid' ? 'Pembayaran disetujui' : 'Pembayaran diverifikasi',
       description: enrollment.payment.reviewedBy
-        ? `Direview oleh ${enrollment.payment.reviewedBy}.`
-        : 'Status pembayaran diperbarui admin.',
+        ? `Diverifikasi oleh ${enrollment.payment.reviewedBy}.`
+        : 'Status pembayaran diperbarui oleh admin.',
     });
   }
 
@@ -145,7 +145,7 @@ function getActivityItems(enrollment: ClassEnrollment): Array<{
       key: 'schedule-assigned',
       at: enrollment.schedule.assignedAt,
       title: 'Jadwal dibuat',
-      description: `${enrollment.schedule.sessions.length} sesi disimpan untuk enrollment ini.`,
+      description: `${enrollment.schedule.sessions.length} sesi belajar disimpan untuk pendaftaran ini.`,
     });
   }
 
@@ -163,7 +163,7 @@ function getActivityItems(enrollment: ClassEnrollment): Array<{
     items.push({
       key: 'reschedule-reviewed',
       at: request.reviewedAt,
-      title: request.status === 'approved' ? 'Permintaan jadwal disetujui' : 'Permintaan jadwal direview',
+      title: request.status === 'approved' ? 'Permintaan jadwal disetujui' : 'Permintaan jadwal ditinjau',
       description: request.adminNote || 'Admin memperbarui status permintaan jadwal.',
     });
   }

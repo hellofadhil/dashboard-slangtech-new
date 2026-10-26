@@ -53,9 +53,9 @@ export default async function EnrollmentsPage({
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">Class Enrollments</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Pendaftaran Kelas</h1>
         <p className="text-muted-foreground">
-          Kelola pembayaran, jadwal, dan permintaan perubahan jadwal untuk enrollment kelas.
+          Kelola pembayaran, penyusunan jadwal belajar, dan permohonan perubahan jadwal kelas.
         </p>
       </div>
       <DataLoadAlert message={enrollmentsResult.error} />

@@ -29,9 +29,7 @@ export function EventDeleteDialog({
         <AlertDialogHeader>
           <AlertDialogTitle>Hapus Event?</AlertDialogTitle>
           <AlertDialogDescription>
-            Event {eventItem?.name.id ?? eventItem?.name.en} akan dihapus dari Firestore.
-            Gambar yang terkait akan dibersihkan dari R2 memakai utilitas upload yang sudah ada.
-            Tindakan ini tidak bisa dibatalkan.
+            Event {eventItem?.name.id ?? eventItem?.name.en} beserta data pendukungnya akan dihapus permanen dari sistem. Tindakan ini tidak dapat dibatalkan.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

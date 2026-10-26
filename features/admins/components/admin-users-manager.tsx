@@ -88,7 +88,7 @@ export function AdminUsersManager({ admins, currentEmail }: AdminUsersManagerPro
         <CardHeader>
           <CardTitle>Akses Admin</CardTitle>
           <CardDescription>
-            Buat akun Firebase Auth baru dan beri akses ke dashboard.
+            Tambah pengelola baru dan atur hak akses ke dashboard.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -120,7 +120,7 @@ export function AdminUsersManager({ admins, currentEmail }: AdminUsersManagerPro
             </div>
             <Button type="submit" disabled={isPending}>
               <UserPlus className="mr-2 h-4 w-4" />
-              Buat Admin
+              Tambah Admin
             </Button>
           </form>
 
@@ -140,7 +140,7 @@ export function AdminUsersManager({ admins, currentEmail }: AdminUsersManagerPro
                     <TableCell className="font-medium">
                       <div className="flex flex-wrap items-center gap-2">
                         {admin.email}
-                        {admin.email === currentEmail ? <Badge variant="outline">Kamu</Badge> : null}
+                        {admin.email === currentEmail ? <Badge variant="outline">Akun Anda</Badge> : null}
                       </div>
                     </TableCell>
                     <TableCell className="text-muted-foreground">{admin.createdBy || '-'}</TableCell>
@@ -172,9 +172,9 @@ export function AdminUsersManager({ admins, currentEmail }: AdminUsersManagerPro
       <AlertDialog open={!!deleteTarget} onOpenChange={(open) => !open && setDeleteTarget(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Hapus akses admin?</AlertDialogTitle>
+            <AlertDialogTitle>Hapus Akses Admin?</AlertDialogTitle>
             <AlertDialogDescription>
-              Email {deleteTarget?.email} tidak akan bisa login ke dashboard lagi. Akun Firebase Auth-nya tidak ikut dihapus dari Firebase Console.
+              Hak akses dashboard untuk {deleteTarget?.email} akan dicabut dan pengguna ini tidak dapat masuk ke dashboard lagi.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

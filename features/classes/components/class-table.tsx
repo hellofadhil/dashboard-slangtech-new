@@ -160,8 +160,8 @@ export function ClassTable({ classes, filters }: ClassTableProps) {
       <Card>
         <CardHeader className="gap-4">
           <div>
-            <CardTitle>Daftar Kelas</CardTitle>
-            <CardDescription>Kelola kelas bahasa, harga, jadwal sesi, dan status publikasi.</CardDescription>
+            <CardTitle>Daftar Program Kelas</CardTitle>
+            <CardDescription>Kelola program kelas bahasa, durasi belajar, biaya kursus, dan status publikasi.</CardDescription>
           </div>
           <CardAction>
             <Button asChild>
@@ -180,12 +180,12 @@ export function ClassTable({ classes, filters }: ClassTableProps) {
                 value={search}
                 onChange={(event) => setSearch(event.target.value)}
                 className="pl-9"
-                placeholder="Cari nama kelas, slug, atau level"
+                placeholder="Cari nama kelas, kode program, atau level..."
               />
             </div>
             <Select value={filters.type ?? 'all'} onValueChange={(value) => updateQuery({ type: value as ClassQuery['type'] })}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Semua tipe" />
+                <SelectValue placeholder="Semua Tipe" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Semua Tipe</SelectItem>
@@ -198,7 +198,7 @@ export function ClassTable({ classes, filters }: ClassTableProps) {
             </Select>
             <Select value={filters.status ?? 'all'} onValueChange={(value) => updateQuery({ status: value as ClassQuery['status'] })}>
               <SelectTrigger className="w-full">
-                <SelectValue placeholder="Semua status" />
+                <SelectValue placeholder="Semua Status" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">Semua Status</SelectItem>

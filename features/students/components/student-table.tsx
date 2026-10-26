@@ -171,7 +171,7 @@ export function StudentTable({ students, filters }: StudentTableProps) {
       <CardHeader className="gap-4">
         <div>
           <CardTitle>Daftar Siswa</CardTitle>
-          <CardDescription>Data siswa berdasarkan profil yang tersimpan dari aplikasi pengguna.</CardDescription>
+          <CardDescription>Daftar seluruh siswa terdaftar beserta rincian kontak, pendidikan, dan alamat domisili.</CardDescription>
         </div>
       </CardHeader>
       <CardContent className="space-y-4">

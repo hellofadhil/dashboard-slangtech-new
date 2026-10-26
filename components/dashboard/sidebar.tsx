@@ -21,37 +21,37 @@ import { cn } from '@/lib/utils';
 
 const navigation = [
   {
-    title: 'Dashboard',
+    title: 'Ringkasan',
     href: '/dashboard',
     icon: LayoutDashboard,
   },
   {
-    title: 'Classes',
+    title: 'Program Kelas',
     href: '/dashboard/classes',
     icon: GraduationCap,
   },
   {
-    title: 'Events',
+    title: 'Event & Workshop',
     href: '/dashboard/events',
     icon: CalendarDays,
   },
   {
-    title: 'Class Enrollments',
+    title: 'Pendaftaran Kelas',
     href: '/dashboard/enrollments',
     icon: ClipboardList,
   },
   {
-    title: 'Event Enrollments',
+    title: 'Pendaftaran Event',
     href: '/dashboard/event-enrollments',
     icon: TicketCheck,
   },
   {
-    title: 'Students',
+    title: 'Data Siswa',
     href: '/dashboard/students',
     icon: UsersRound,
   },
   {
-    title: 'Teachers',
+    title: 'Data Guru',
     href: '/dashboard/teachers',
     icon: School,
   },

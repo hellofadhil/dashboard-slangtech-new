@@ -229,9 +229,9 @@ export function ZawaSessionManager({ initialSession }: ZawaSessionManagerProps) 
               <QrCode className="size-5" />
             </div>
             <div className="min-w-0">
-              <CardTitle>Session WhatsApp</CardTitle>
+              <CardTitle>Koneksi WhatsApp</CardTitle>
               <CardDescription>
-                Scan QR dengan WhatsApp yang akan dipakai untuk notifikasi.
+                Pindai kode QR menggunakan akun WhatsApp yang digunakan untuk notifikasi.
               </CardDescription>
             </div>
           </div>
@@ -259,14 +259,14 @@ export function ZawaSessionManager({ initialSession }: ZawaSessionManagerProps) 
                 <div>
                   <p className="text-lg font-semibold">WhatsApp sudah terhubung</p>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Jalur notifikasi siap dipakai dari API project ini.
+                    Layanan notifikasi otomatis ke siswa siap digunakan.
                   </p>
                 </div>
               </div>
             ) : hasQrCode ? (
               <img
                 src={getQrCodeSrc(qrCode)}
-                alt="QR code WhatsApp Zawa"
+                alt="QR code WhatsApp"
                 className="aspect-square w-full max-w-72 rounded-md border bg-white p-3"
               />
             ) : (
@@ -274,7 +274,7 @@ export function ZawaSessionManager({ initialSession }: ZawaSessionManagerProps) 
                 <Skeleton className="aspect-square w-full" />
                 <div className="flex items-center gap-2 text-sm text-muted-foreground">
                   <Loader2 className="size-4 animate-spin" />
-                  Menyiapkan QR code
+                  Menyiapkan kode QR...
                 </div>
               </div>
             )}
@@ -284,7 +284,7 @@ export function ZawaSessionManager({ initialSession }: ZawaSessionManagerProps) 
             {!session && (
               <Button onClick={() => void createSession()} disabled={isBusy}>
                 {action === 'create' ? <Loader2 className="size-4 animate-spin" /> : <QrCode className="size-4" />}
-                Buat Session
+                Hubungkan WhatsApp
               </Button>
             )}
             <Button
@@ -293,7 +293,7 @@ export function ZawaSessionManager({ initialSession }: ZawaSessionManagerProps) 
               disabled={isBusy || !session}
             >
               {action === 'refresh' ? <Loader2 className="size-4 animate-spin" /> : <RefreshCw className="size-4" />}
-              Refresh
+              Perbarui Status
             </Button>
             <Button
               variant="outline"
@@ -301,20 +301,20 @@ export function ZawaSessionManager({ initialSession }: ZawaSessionManagerProps) 
               disabled={isBusy || !session}
             >
               {action === 'reset' ? <Loader2 className="size-4 animate-spin" /> : <RotateCcw className="size-4" />}
-              Reset
+              Reset Koneksi
             </Button>
             <AlertDialog>
               <AlertDialogTrigger asChild>
                 <Button variant="destructive" disabled={isBusy || !session}>
                   <Trash2 className="size-4" />
-                  Hapus
+                  Putus Koneksi
                 </Button>
               </AlertDialogTrigger>
               <AlertDialogContent>
                 <AlertDialogHeader>
-                  <AlertDialogTitle>Hapus session WhatsApp?</AlertDialogTitle>
+                  <AlertDialogTitle>Putus Koneksi WhatsApp?</AlertDialogTitle>
                   <AlertDialogDescription>
-                    Session akan dihapus dari Zawa dan Firestore. Admin perlu scan QR baru untuk mengaktifkan notifikasi lagi.
+                    Koneksi WhatsApp akan diputus dan sesi login akan dihapus. Anda perlu memindai kode QR baru jika ingin mengaktifkan kembali pengiriman notifikasi.
                   </AlertDialogDescription>
                 </AlertDialogHeader>
                 <AlertDialogFooter>
@@ -323,7 +323,7 @@ export function ZawaSessionManager({ initialSession }: ZawaSessionManagerProps) 
                     className="bg-destructive text-white hover:bg-destructive/90"
                     onClick={() => void requestSession('DELETE', 'delete')}
                   >
-                    Hapus Session
+                    Ya, Putus Koneksi
                   </AlertDialogAction>
                 </AlertDialogFooter>
               </AlertDialogContent>
@@ -336,7 +336,7 @@ export function ZawaSessionManager({ initialSession }: ZawaSessionManagerProps) 
         <CardHeader>
           <CardTitle>Info Koneksi</CardTitle>
           <CardDescription>
-            Ringkasan session WhatsApp yang sedang dipakai.
+            Rincian status koneksi WhatsApp yang saat ini aktif.
           </CardDescription>
         </CardHeader>
         <CardContent>

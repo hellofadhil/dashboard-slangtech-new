@@ -31,17 +31,24 @@ export async function createTeacherAction(input: unknown): Promise<ActionResult<
 
     const parsed = TeacherCreateSchema.safeParse(input);
     if (!parsed.success) {
-      return validationError<Teacher>('Data akun guru belum valid', parsed.error.flatten().fieldErrors);
+      return validationError<Teacher>('Data guru belum valid', parsed.error.flatten().fieldErrors);
     }
 
-    const rawInput = parsed.data.username.trim().toLowerCase();
-    const email = rawInput.includes('@') ? rawInput : `${rawInput}@slangtech.com`;
-    const username = rawInput.includes('@') ? rawInput.split('@')[0] : rawInput;
-
+    const email = parsed.data.email.trim().toLowerCase();
     const authUser = await createFirebaseAuthUser(email, parsed.data.password);
-    const teacher = await createTeacher(authUser.uid, authUser.email, currentAdmin.email, username);
-    revalidateTeachers();
-    return { success: true, message: 'Akun guru berhasil dibuat', data: teacher };
+
+    try {
+      const teacher = await createTeacher(authUser.uid, parsed.data, currentAdmin.email);
+      revalidateTeachers();
+      return { success: true, message: 'Data dan akun guru berhasil dibuat', data: teacher };
+    } catch (saveError) {
+      try {
+        await deleteFirebaseAuthUser(authUser.uid);
+      } catch (cleanupErr) {
+        console.warn('Gagal membersihkan user Auth setelah gagal menyimpan Firestore:', cleanupErr);
+      }
+      throw saveError;
+    }
   } catch (error) {
     return {
       success: false,

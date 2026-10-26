@@ -463,7 +463,7 @@ export function ClassForm({ classItem }: ClassFormProps) {
         <Card>
           <CardHeader>
             <CardTitle>Pengaturan Kelas</CardTitle>
-            <CardDescription>Durasi dan status kurasi dashboard.</CardDescription>
+            <CardDescription>Durasi sesi belajar dan status tayang program kelas.</CardDescription>
           </CardHeader>
           <CardContent className="grid gap-4 md:grid-cols-2">
             <FormField

@@ -33,6 +33,39 @@ export type TeacherInput = {
 export type TeacherCreateInput = {
   username: string;
   password: string;
+  email: string;
+  fullName: string;
+  nickname: string;
+  phoneCountryCode: string;
+  phoneNationalNumber: string;
+  phoneNumber?: string;
+  birthDate: string;
+  birthPlace: string;
+  lastEducation: string;
+  headline?: string;
+  bio?: string;
+  experienceYears?: number;
+  // KTP
+  ktpStreet: string;
+  ktpProvinceId: string;
+  ktpProvinceName: string;
+  ktpRegencyId: string;
+  ktpRegencyName: string;
+  ktpDistrictId: string;
+  ktpDistrictName: string;
+  ktpVillageId: string;
+  ktpVillageName: string;
+  // Domicile
+  domicileSameAsKtp: boolean;
+  domicileStreet?: string;
+  domicileProvinceId?: string;
+  domicileProvinceName?: string;
+  domicileRegencyId?: string;
+  domicileRegencyName?: string;
+  domicileDistrictId?: string;
+  domicileDistrictName?: string;
+  domicileVillageId?: string;
+  domicileVillageName?: string;
 };
 
 export type Teacher = TeacherInput & {
@@ -41,6 +74,29 @@ export type Teacher = TeacherInput & {
   username?: string;
   birthDate?: string;
   birthPlace?: string;
+  phoneCountryCode?: string;
+  phoneNationalNumber?: string;
+  ktpStreet?: string;
+  ktpProvinceId?: string;
+  ktpProvinceName?: string;
+  ktpRegencyId?: string;
+  ktpRegencyName?: string;
+  ktpDistrictId?: string;
+  ktpDistrictName?: string;
+  ktpVillageId?: string;
+  ktpVillageName?: string;
+  ktpAddress?: string;
+  domicileSameAsKtp?: boolean;
+  domicileStreet?: string;
+  domicileProvinceId?: string;
+  domicileProvinceName?: string;
+  domicileRegencyId?: string;
+  domicileRegencyName?: string;
+  domicileDistrictId?: string;
+  domicileDistrictName?: string;
+  domicileVillageId?: string;
+  domicileVillageName?: string;
+  domicileAddress?: string;
   role: 'teacher';
   isProfileComplete: boolean;
   createdAt: Date | unknown;
@@ -78,4 +134,40 @@ export const emptyTeacherInput: TeacherInput = {
   lastEducation: '',
   address: emptyTeacherAddressInput,
   status: 'active',
+};
+
+export const emptyTeacherCreateInput: TeacherCreateInput = {
+  username: '',
+  password: '',
+  email: '',
+  fullName: '',
+  nickname: '',
+  phoneCountryCode: '+62',
+  phoneNationalNumber: '',
+  phoneNumber: '',
+  birthDate: '',
+  birthPlace: '',
+  lastEducation: '',
+  headline: '',
+  bio: '',
+  experienceYears: 0,
+  ktpStreet: '',
+  ktpProvinceId: '',
+  ktpProvinceName: '',
+  ktpRegencyId: '',
+  ktpRegencyName: '',
+  ktpDistrictId: '',
+  ktpDistrictName: '',
+  ktpVillageId: '',
+  ktpVillageName: '',
+  domicileSameAsKtp: false,
+  domicileStreet: '',
+  domicileProvinceId: '',
+  domicileProvinceName: '',
+  domicileRegencyId: '',
+  domicileRegencyName: '',
+  domicileDistrictId: '',
+  domicileDistrictName: '',
+  domicileVillageId: '',
+  domicileVillageName: '',
 };

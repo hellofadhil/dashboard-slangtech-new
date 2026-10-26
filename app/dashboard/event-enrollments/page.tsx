@@ -9,9 +9,9 @@ export default async function EventEnrollmentsPage() {
   return (
     <div className="space-y-8">
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">Event Enrollments</h1>
+        <h1 className="text-3xl font-bold tracking-tight">Pendaftaran Event</h1>
         <p className="text-muted-foreground">
-          Kelola enrollment event secara terpisah dari class enrollments.
+          Pantau dan kelola data pendaftaran peserta untuk semua workshop dan event.
         </p>
       </div>
       <DataLoadAlert message={enrollmentsResult.error} />

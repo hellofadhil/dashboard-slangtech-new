@@ -225,7 +225,7 @@ export function ImageUploader({
         <>
           {value.length > 0 && (
             <p className="text-sm text-muted-foreground">
-              {value.length} gambar ditambahkan. Drag gambar untuk mengatur urutan. Gambar pertama menjadi cover.
+              {value.length} gambar dipilih. Geser gambar untuk mengatur urutan tampilan. Gambar pertama otomatis menjadi sampul utama.
             </p>
           )}
           <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
