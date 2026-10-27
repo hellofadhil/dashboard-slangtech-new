@@ -31,3 +31,9 @@ export {
   toZawaSessionView,
   updateZawaSessionFromRemote,
 } from '@/features/zawa/data';
+export {
+  getWhatsAppSettings,
+  saveWhatsAppSettings,
+  saveWhatsAppMessageLog,
+  toWhatsAppSettingsView,
+} from '@/features/whatsapp/data';

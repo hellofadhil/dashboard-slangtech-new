@@ -2,34 +2,19 @@ import { NextRequest, NextResponse } from 'next/server';
 import { z } from 'zod';
 import { getCurrentAdminUser } from '@/lib/auth/server';
 import {
-  getZawaSession,
-  sendZawaMessage,
-  ZawaApiError,
-} from '@/lib/zawa/client';
-import type { ZawaMessagePayload } from '@/lib/zawa/types';
-import {
-  getZawaSessionRecord,
-  saveZawaMessageLog,
-  toZawaSessionView,
-  updateZawaSessionFromRemote,
-} from '@/features/zawa/data';
+  sendWhatsAppMessage,
+  WhatsAppApiError,
+} from '@/lib/whatsapp/client';
 
 export const runtime = 'nodejs';
-
-const messageObjectSchema = z.record(z.string(), z.unknown());
 
 const zawaMessageSchema = z.object({
   phone: z.string().trim().min(3).optional(),
   group: z.string().trim().min(3).optional(),
   newsletter: z.string().trim().min(3).optional(),
-  type: z.enum(['text', 'image', 'video', 'audio', 'document', 'location', 'contact']),
+  type: z.string().optional(),
   text: z.string().trim().optional(),
-  image: messageObjectSchema.optional(),
-  video: messageObjectSchema.optional(),
-  audio: messageObjectSchema.optional(),
-  document: messageObjectSchema.optional(),
-  location: messageObjectSchema.optional(),
-  contact: messageObjectSchema.optional(),
+  message: z.string().trim().optional(),
 }).superRefine((value, context) => {
   if (!value.phone && !value.group && !value.newsletter) {
     context.addIssue({
@@ -39,25 +24,17 @@ const zawaMessageSchema = z.object({
     });
   }
 
-  if (value.type === 'text' && !value.text) {
+  if (!value.text && !value.message) {
     context.addIssue({
       code: 'custom',
       path: ['text'],
-      message: 'Text wajib diisi untuk pesan text',
+      message: 'Text atau pesan wajib diisi',
     });
   }
 });
 
 function jsonError(message: string, status: number, details?: unknown) {
   return NextResponse.json({ success: false, message, details }, { status });
-}
-
-function getTarget(payload: ZawaMessagePayload): string {
-  return payload.phone || payload.group || payload.newsletter || '';
-}
-
-function getErrorMessage(error: unknown, fallback: string): string {
-  return error instanceof Error ? error.message : fallback;
 }
 
 function getBearerToken(value: string): string {
@@ -71,7 +48,7 @@ function getMessageApiKey(request: NextRequest): string {
 }
 
 async function getRequester(request: NextRequest): Promise<string | null> {
-  const configuredApiKey = process.env.ZAWA_MESSAGE_API_KEY?.trim();
+  const configuredApiKey = process.env.WA_API_KEY?.trim() || process.env.ZAWA_MESSAGE_API_KEY?.trim();
   const requestApiKey = getMessageApiKey(request);
 
   if (configuredApiKey && requestApiKey && requestApiKey === configuredApiKey) {
@@ -96,72 +73,31 @@ export async function POST(request: NextRequest) {
     return jsonError('Payload pesan WhatsApp belum valid', 400, parsed.error.flatten().fieldErrors);
   }
 
-  const payload = parsed.data;
-  const session = await getZawaSessionRecord();
-
-  if (!session) {
-    return jsonError('Sesi Zawa belum dibuat', 409);
-  }
-
-  const credentials = {
-    zawaId: session.zawaId,
-    sessionId: session.sessionId,
-  };
+  const phone = parsed.data.phone || parsed.data.group || parsed.data.newsletter || '';
+  const messageText = parsed.data.message || parsed.data.text || '';
 
   try {
-    const remoteSession = await getZawaSession(credentials);
-    const syncedSession = await updateZawaSessionFromRemote(session, remoteSession, requester);
+    const result = await sendWhatsAppMessage(
+      {
+        phone,
+        message: messageText,
+      },
+      `zawa-adapter:${requester}`,
+    );
 
-    if (!syncedSession.isConnected) {
-      await saveZawaMessageLog({
-        status: 'failed',
-        payload,
-        type: payload.type,
-        target: getTarget(payload),
-        errorMessage: 'WhatsApp belum terhubung. Scan QR dulu sebelum mengirim pesan.',
-        errorStatus: 409,
-        requestedBy: requester,
-        session: credentials,
-      });
-
-      return NextResponse.json(
-        {
-          success: false,
-          message: 'WhatsApp belum terhubung. Scan QR dulu sebelum mengirim pesan.',
-          data: toZawaSessionView(syncedSession),
-        },
-        { status: 409 },
-      );
+    return NextResponse.json({
+      success: true,
+      messageId: result.messageId || 'sent',
+      data: result.details,
+    });
+  } catch (error) {
+    if (error instanceof WhatsAppApiError) {
+      return jsonError(error.message, error.status, error.details);
     }
 
-    const result = await sendZawaMessage(credentials, payload);
-
-    await saveZawaMessageLog({
-      status: 'sent',
-      payload,
-      type: payload.type,
-      target: getTarget(payload),
-      messageId: result.messageId,
-      requestedBy: requester,
-      session: credentials,
-    });
-
-    return NextResponse.json({ success: true, messageId: result.messageId });
-  } catch (error) {
-    await saveZawaMessageLog({
-      status: 'failed',
-      payload,
-      type: payload.type,
-      target: getTarget(payload),
-      errorMessage: getErrorMessage(error, 'Gagal mengirim pesan WhatsApp'),
-      errorStatus: error instanceof ZawaApiError ? error.status : undefined,
-      requestedBy: requester,
-      session: credentials,
-    });
-
     return jsonError(
-      getErrorMessage(error, 'Gagal mengirim pesan WhatsApp'),
-      error instanceof ZawaApiError ? 502 : 500,
+      error instanceof Error ? error.message : 'Gagal mengirim pesan WhatsApp',
+      500,
     );
   }
 }

@@ -18,6 +18,7 @@ import {
   updateEnrollmentSessionStatus,
 } from '@/features/enrollments/data';
 import { sendPaymentConfirmationEmail } from '@/features/enrollments/payment-confirmation-email';
+import { sendPaymentConfirmationWhatsApp } from '@/features/enrollments/payment-confirmation-whatsapp';
 import type { ClassEnrollment } from '@/features/enrollments/types';
 import type { ActionResult } from '@/features/shared/types';
 import {
@@ -47,12 +48,20 @@ export async function approveManualPaymentAction(input: unknown): Promise<Action
       emailWarning = getActionErrorMessage(error, 'Email konfirmasi belum berhasil dikirim');
     }
 
+    let waWarning: string | null = null;
+    try {
+      await sendPaymentConfirmationWhatsApp(enrollment);
+    } catch (error) {
+      waWarning = getActionErrorMessage(error, 'WhatsApp konfirmasi belum berhasil dikirim');
+    }
+
     revalidateEnrollmentPaths(enrollment.id);
+    const warnings = [emailWarning, waWarning].filter(Boolean);
     return {
       success: true,
-      message: emailWarning
-        ? `Pembayaran berhasil disetujui, tapi ${emailWarning.toLowerCase()}`
-        : 'Pembayaran berhasil disetujui dan email konfirmasi terkirim',
+      message: warnings.length > 0
+        ? `Pembayaran berhasil disetujui, tapi ${warnings.join(' dan ').toLowerCase()}`
+        : 'Pembayaran berhasil disetujui. Notifikasi email dan WhatsApp telah dikirim ke siswa.',
       data: enrollment,
     };
   } catch (error) {
