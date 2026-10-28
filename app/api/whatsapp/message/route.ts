@@ -38,7 +38,7 @@ function getMessageApiKey(request: NextRequest): string {
 }
 
 async function getRequester(request: NextRequest): Promise<string | null> {
-  const configuredApiKey = process.env.WA_API_KEY?.trim() || process.env.ZAWA_MESSAGE_API_KEY?.trim();
+  const configuredApiKey = process.env.WA_API_KEY?.trim();
   const requestApiKey = getMessageApiKey(request);
 
   if (configuredApiKey && requestApiKey && requestApiKey === configuredApiKey) {

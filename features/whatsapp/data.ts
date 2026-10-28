@@ -47,7 +47,7 @@ function stripUndefined(data: Record<string, unknown>): Record<string, unknown> 
 export function toWhatsAppSettingsView(settings: WhatsAppSettings | null): WhatsAppSettingsView {
   const envBaseUrl = process.env.WA_API_BASE_URL?.trim();
   const envBotName = process.env.WA_BOT_NAME?.trim();
-  const envApiKey = process.env.WA_API_KEY?.trim() || process.env.ZAWA_MESSAGE_API_KEY?.trim() || '';
+  const envApiKey = process.env.WA_API_KEY?.trim() || '';
   const envAdminPhone = process.env.WA_ADMIN_PHONE?.trim();
 
   const baseUrl = settings?.baseUrl?.trim() || envBaseUrl || DEFAULT_WA_BASE_URL;

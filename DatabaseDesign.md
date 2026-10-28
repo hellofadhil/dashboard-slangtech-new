@@ -36,8 +36,8 @@ type FirestoreCollections = {
   events: EventDocument;
   enrollments: ClassEnrollmentDocument | LegacyEventEnrollmentDocument;
   eventEnrollments: EventEnrollmentDocument;
-  zawaSessions: ZawaSessionDocument;
-  zawaMessages: ZawaMessageDocument;
+  whatsappSettings: WhatsAppSettingsDocument;
+  whatsappMessages: WhatsAppMessageDocument;
 
   // Legacy/read fallback untuk dashboard summary.
   payments?: LegacyPaymentDocument;
@@ -457,74 +457,38 @@ Catatan snapshot:
 - Saat event berubah, sistem dapat sync `eventSlug` dan `eventSnapshot` pada `eventEnrollments` dan legacy `enrollments`.
 - Harga event tidak ikut diubah saat sync snapshot saat ini; sync fokus ke identity, nama, waktu, trainer, dan sessions.
 
-## `zawaSessions/{sessionDocId}`
+## whatsappSettings/{settingsDocId}
 
-Saat ini hanya satu dokumen utama dipakai: `zawaSessions/primary`.
+Dokumen utama konfigurasi gateway: whatsappSettings/primary.
 
-```ts
-type ZawaSessionStatus = 'pending' | 'connected' | 'disconnected' | 'error';
-
-type ZawaSessionDocument = {
+`	s
+type WhatsAppSettingsDocument = {
   id: 'primary';
-  zawaId: string;
-  sessionId: string;
-  status: ZawaSessionStatus;
-  isConnected: boolean;
-  qrcode?: string;
-  createdAt: TimestampLike;
-  updatedAt: TimestampLike;
-  expiresAt: string;
-  lastSyncedAt?: TimestampLike | string;
-  lastError?: string;
-  createdBy: string;
+  baseUrl: string;
+  userBot: string;
+  apiKey: string;
+  adminPhone?: string;
+  updatedAt: TimestampLike | string;
   updatedBy: string;
 };
-```
+`
 
-## `zawaMessages/{messageLogId}`
+## whatsappMessages/{messageLogId}
 
-```ts
-type ZawaMessageType =
-  | 'text'
-  | 'image'
-  | 'video'
-  | 'audio'
-  | 'document'
-  | 'location'
-  | 'contact';
-
-type ZawaMessagePayload = {
-  phone?: string;
-  group?: string;
-  newsletter?: string;
-  type: ZawaMessageType;
-  text?: string;
-  image?: Record<string, unknown>;
-  video?: Record<string, unknown>;
-  audio?: Record<string, unknown>;
-  document?: Record<string, unknown>;
-  location?: Record<string, unknown>;
-  contact?: Record<string, unknown>;
-};
-
-type ZawaMessageDocument = {
+`	s
+type WhatsAppMessageDocument = {
   id: string;
+  phone: string;
+  message: string;
+  userBot: string;
   status: 'sent' | 'failed';
-  type: ZawaMessageType;
-  target: string;
-  payload: ZawaMessagePayload;
   messageId?: string;
-  errorMessage?: string;
-  errorStatus?: number;
+  error?: string;
   requestedBy: string;
-  session: {
-    zawaId: string;
-    sessionId: string;
-  };
-  createdAt: TimestampLike;
-  updatedAt: TimestampLike;
+  response?: unknown;
+  createdAt: TimestampLike | string;
 };
-```
+`
 
 ## Legacy Summary Collections
 

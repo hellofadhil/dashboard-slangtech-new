@@ -23,15 +23,6 @@ export {
 } from '@/features/events/data';
 export { getStudents } from '@/features/students/data';
 export {
-  createZawaSessionRecord,
-  deleteZawaSessionRecord,
-  getZawaSessionRecord,
-  markZawaSessionError,
-  saveZawaMessageLog,
-  toZawaSessionView,
-  updateZawaSessionFromRemote,
-} from '@/features/zawa/data';
-export {
   getWhatsAppSettings,
   saveWhatsAppSettings,
   saveWhatsAppMessageLog,
