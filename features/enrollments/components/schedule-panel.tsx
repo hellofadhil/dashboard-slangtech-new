@@ -27,10 +27,12 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import type { ClassEnrollment, ScheduleSessionStatus } from '@/lib/dashboard/types';
+import type { Teacher } from '@/features/teachers/types';
 import { formatDashboardDate } from '@/lib/dashboard/utils';
 
 interface SchedulePanelProps {
   enrollment: ClassEnrollment;
+  teachers?: Teacher[];
 }
 
 const SCHEDULE_PAGE_SIZE = 6;
@@ -41,7 +43,7 @@ function canAssignSchedule(enrollment: ClassEnrollment): boolean {
     (!enrollment.schedule || enrollment.schedule.status === 'pending_admin_assignment');
 }
 
-export function SchedulePanel({ enrollment }: SchedulePanelProps) {
+export function SchedulePanel({ enrollment, teachers = [] }: SchedulePanelProps) {
   const [page, setPage] = useState(1);
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
@@ -96,7 +98,7 @@ export function SchedulePanel({ enrollment }: SchedulePanelProps) {
       </CardHeader>
       <CardContent className="space-y-6">
         {showAssignForm ? (
-          <AssignScheduleForm enrollment={enrollment} />
+          <AssignScheduleForm enrollment={enrollment} teachers={teachers} />
         ) : null}
 
         {!showAssignForm && (!schedule || schedule.status === 'pending_admin_assignment') ? (
@@ -154,7 +156,15 @@ export function SchedulePanel({ enrollment }: SchedulePanelProps) {
                       <TableCell>{formatDashboardDate(session.startsAt)}</TableCell>
                       <TableCell>{formatDashboardDate(session.endsAt)}</TableCell>
                       <TableCell className="truncate" title={session.teacherName}>
-                        {session.teacherName || '-'}
+                        <div className="flex items-center gap-1.5">
+                          {session.teacherId ? (
+                            <span
+                              className="inline-block h-2 w-2 rounded-full bg-emerald-500 shrink-0"
+                              title="Terhubung ke Data Guru"
+                            />
+                          ) : null}
+                          <span className="truncate">{session.teacherName || '-'}</span>
+                        </div>
                       </TableCell>
                       <TableCell>
                         <div className="min-w-0">

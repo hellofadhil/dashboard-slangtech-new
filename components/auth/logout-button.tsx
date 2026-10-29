@@ -24,7 +24,7 @@ export function LogoutButton({ className, variant = 'ghost', asMenuItem = false 
       router.replace('/login');
       router.refresh();
     } catch {
-      toast.error('Gagal keluar');
+      toast.error('Gagal logout');
     }
   };
 
@@ -36,7 +36,7 @@ export function LogoutButton({ className, variant = 'ghost', asMenuItem = false 
         onClick={handleLogout}
       >
         <LogOut className="mr-2 h-4 w-4" />
-        <span>Keluar</span>
+        <span>Logout</span>
       </button>
     );
   }
@@ -44,7 +44,7 @@ export function LogoutButton({ className, variant = 'ghost', asMenuItem = false 
   return (
     <Button type="button" variant={variant} className={cn('w-full justify-start gap-2', className)} onClick={handleLogout}>
       <LogOut className="h-4 w-4" />
-      Keluar
+      Logout
     </Button>
   );
 }

@@ -66,7 +66,8 @@ export type EnrollmentScheduleSession = {
   startsAt: string;
   endsAt: string;
   timezone: string;
-  teacherName: string;
+  teacherId?: string;
+teacherName: string;
   locationType: ScheduleLocationType;
   locationLabel: string;
   meetingUrl: string;
@@ -174,3 +175,4 @@ export interface EnrollmentQuery {
   search?: string;
   filter?: EnrollmentListFilter;
 }
+

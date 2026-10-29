@@ -341,6 +341,7 @@ function normalizeSession(value: unknown): EnrollmentScheduleSession {
     startsAt: toIsoString(data.startsAt),
     endsAt: toIsoString(data.endsAt),
     timezone: asString(data.timezone, DEFAULT_TIMEZONE),
+    teacherId: asString(data.teacherId) || undefined,
     teacherName: asString(data.teacherName),
     locationType: normalizeLocationType(data.locationType),
     locationLabel: asString(data.locationLabel),
@@ -551,6 +552,7 @@ function prepareScheduleSessions(input: AssignEnrollmentScheduleInput): Enrollme
   const sessions = input.sessions
     .map<EnrollmentScheduleSession>((session) => ({
       ...session,
+      teacherId: session.teacherId || undefined,
       timezone: session.timezone || DEFAULT_TIMEZONE,
       status: 'scheduled',
     }))
@@ -664,6 +666,13 @@ export async function assignEnrollmentSchedule(
   const sessions = prepareScheduleSessions(input);
   const assignedAt = nowIso();
 
+  const assignedTeacherIds = Array.from(
+    new Set(sessions.map((s) => s.teacherId).filter((id) => Boolean(id)))
+  );
+  const assignedTeacherNames = Array.from(
+    new Set(sessions.map((s) => s.teacherName).filter((name) => Boolean(name)))
+  );
+
   const schedule: EnrollmentSchedule = {
     status: 'assigned',
     timezone: DEFAULT_TIMEZONE,
@@ -682,6 +691,8 @@ export async function assignEnrollmentSchedule(
 
   await updateEnrollmentDocument(input.enrollmentId, {
     schedule,
+    assignedTeacherIds,
+    assignedTeacherNames,
     updatedAt: assignedAt,
   });
 
@@ -795,6 +806,7 @@ export async function approveEnrollmentRescheduleRequest(
     startsAt: input.startsAt,
     endsAt: input.endsAt,
     timezone: input.timezone || targetSession.timezone || DEFAULT_TIMEZONE,
+    teacherId: input.teacherId ?? targetSession.teacherId,
     teacherName: input.teacherName ?? targetSession.teacherName,
     locationType: input.locationType ?? targetSession.locationType,
     locationLabel: input.locationLabel ?? targetSession.locationLabel,
@@ -828,8 +840,17 @@ export async function approveEnrollmentRescheduleRequest(
     updatedAt: reviewedAt,
   };
 
+  const assignedTeacherIds = Array.from(
+    new Set(sessions.map((s) => s.teacherId).filter((id) => Boolean(id)))
+  );
+  const assignedTeacherNames = Array.from(
+    new Set(sessions.map((s) => s.teacherName).filter((name) => Boolean(name)))
+  );
+
   await updateEnrollmentDocument(input.enrollmentId, {
     schedule,
+    assignedTeacherIds,
+    assignedTeacherNames,
     updatedAt: reviewedAt,
   });
 
@@ -877,3 +898,5 @@ export async function rejectEnrollmentRescheduleRequest(
 
   return updatedEnrollment;
 }
+
+

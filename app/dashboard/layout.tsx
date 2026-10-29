@@ -4,8 +4,8 @@ import { DashboardHeader } from '@/components/dashboard/header';
 import { DashboardSidebar } from '@/components/dashboard/sidebar';
 
 export const metadata = {
-  title: 'Online Class Admin Dashboard',
-  description: 'Panel pengelolaan kelas bahasa dan operasional siswa',
+  title: 'SlangTech - Admin Management Portal',
+  description: 'Panel pengelolaan kelas, pendaftaran, verifikasi pembayaran, dan jadwal LKP SlangTech',
 };
 
 export const dynamic = 'force-dynamic';
@@ -35,9 +35,9 @@ export default async function DashboardLayout({
     <div className="flex min-h-screen bg-background">
       <DashboardSidebar />
       <div className="flex min-w-0 flex-1 flex-col md:ml-56">
-        <DashboardHeader />
+        <DashboardHeader adminEmail={adminUser.email} />
         <main className="flex-1 overflow-auto">
-          <div className="p-4 md:p-6">
+          <div className="p-4 sm:p-6 lg:p-8">
             {children}
           </div>
         </main>

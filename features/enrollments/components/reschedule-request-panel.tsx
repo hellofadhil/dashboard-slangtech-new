@@ -2,7 +2,7 @@
 
 import { type ReactNode, useMemo, useState, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
-import { CheckCircle2, XCircle } from 'lucide-react';
+import { CheckCircle2, UserCheck, XCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   approveRescheduleRequestAction,
@@ -40,10 +40,12 @@ import type {
   EnrollmentScheduleSession,
   ScheduleLocationType,
 } from '@/lib/dashboard/types';
+import type { Teacher } from '@/features/teachers/types';
 import { formatDashboardDate } from '@/lib/dashboard/utils';
 
 interface RescheduleRequestPanelProps {
   enrollment: ClassEnrollment;
+  teachers?: Teacher[];
 }
 
 function getJakartaParts(iso: string): { date: string; time: string } {
@@ -110,7 +112,7 @@ function DetailItem({ label, value }: { label: string; value: ReactNode }) {
   );
 }
 
-export function RescheduleRequestPanel({ enrollment }: RescheduleRequestPanelProps) {
+export function RescheduleRequestPanel({ enrollment, teachers = [] }: RescheduleRequestPanelProps) {
   const request = enrollment.schedule?.rescheduleRequest ?? null;
   const targetSession = useMemo(() => (
     enrollment.schedule?.sessions.find((session) => session.id === request?.targetSessionId)
@@ -125,7 +127,20 @@ export function RescheduleRequestPanel({ enrollment }: RescheduleRequestPanelPro
   const [startTime, setStartTime] = useState(defaultStartParts.time);
   const [endDate, setEndDate] = useState(defaultEndParts.date);
   const [endTime, setEndTime] = useState(defaultEndParts.time);
-  const [teacherName, setTeacherName] = useState(targetSession?.teacherName ?? '');
+
+  const matchedTeacher = targetSession?.teacherId
+    ? teachers.find((t) => t.id === targetSession.teacherId)
+    : teachers.find((t) => (t.fullName || t.nickname || t.email) === targetSession?.teacherName);
+
+  const [selectedTeacherId, setSelectedTeacherId] = useState<string>(
+    matchedTeacher ? matchedTeacher.id : (teachers[0]?.id ?? ''),
+  );
+
+  const selectedTeacher = useMemo(
+    () => teachers.find((t) => t.id === selectedTeacherId) ?? null,
+    [teachers, selectedTeacherId],
+  );
+
   const [locationType, setLocationType] = useState<ScheduleLocationType>(targetSession?.locationType ?? 'online');
   const [locationLabel, setLocationLabel] = useState(targetSession?.locationLabel ?? '');
   const [meetingUrl, setMeetingUrl] = useState(targetSession?.meetingUrl ?? '');
@@ -146,16 +161,18 @@ export function RescheduleRequestPanel({ enrollment }: RescheduleRequestPanelPro
       return;
     }
 
-    const slotStartParts = getJakartaParts(slot.startsAt);
-    const slotEndParts = getJakartaParts(slot.endsAt || getFallbackEnd(slot.startsAt, targetSession));
-    setStartDate(slotStartParts.date);
-    setStartTime(slotStartParts.time);
-    setEndDate(slotEndParts.date);
-    setEndTime(slotEndParts.time);
+    const startParts = getJakartaParts(slot.startsAt);
+    setStartDate(startParts.date);
+    setStartTime(startParts.time);
+
+    const endIso = slot.endsAt || getFallbackEnd(slot.startsAt, targetSession);
+    const endParts = getJakartaParts(endIso);
+    setEndDate(endParts.date);
+    setEndTime(endParts.time);
   };
 
-  const requestConfirmation = (action: 'approve' | 'reject') => {
-    if (!request || request.status !== 'pending_admin_approval') {
+  const handleApplyAction = () => {
+    if (!confirmAction || !request) {
       return;
     }
 
@@ -164,30 +181,34 @@ export function RescheduleRequestPanel({ enrollment }: RescheduleRequestPanelPro
       return;
     }
 
-    if (action === 'approve') {
-      const startsAt = createJakartaIso(startDate, startTime);
-      const endsAt = createJakartaIso(endDate, endTime);
-      const startsAtMs = new Date(startsAt).getTime();
-      const endsAtMs = new Date(endsAt).getTime();
-
-      if (Number.isNaN(startsAtMs) || Number.isNaN(endsAtMs)) {
-        toast.error('Tanggal dan waktu approval belum valid');
+    if (confirmAction === 'approve') {
+      if (!selectedTeacher) {
+        toast.error('Pilih guru pengajar dari Data Guru terlebih dahulu');
         return;
       }
 
-      if (endsAtMs <= startsAtMs) {
+      const startIso = createJakartaIso(startDate, startTime);
+      const endIso = createJakartaIso(endDate, endTime);
+
+      if (!startIso || !endIso) {
+        toast.error('Jadwal baru belum valid');
+        return;
+      }
+
+      if (new Date(endIso).getTime() <= new Date(startIso).getTime()) {
         toast.error('Jam selesai harus setelah jam mulai');
         return;
       }
+
+      if (locationType === 'online' && !meetingUrl.trim()) {
+        toast.error('Meeting URL wajib diisi untuk kelas online');
+        return;
+      }
     }
 
-    setConfirmAction(action);
-  };
-
-  const handleConfirm = () => {
-    if (!request || !confirmAction) {
-      return;
-    }
+    const teacherName = selectedTeacher
+      ? (selectedTeacher.fullName || selectedTeacher.nickname || selectedTeacher.email)
+      : '';
 
     startTransition(async () => {
       const result = confirmAction === 'approve'
@@ -197,6 +218,7 @@ export function RescheduleRequestPanel({ enrollment }: RescheduleRequestPanelPro
             startsAt: createJakartaIso(startDate, startTime),
             endsAt: createJakartaIso(endDate, endTime),
             timezone: DEFAULT_TIMEZONE,
+            teacherId: selectedTeacher?.id,
             teacherName,
             locationType,
             locationLabel,
@@ -248,54 +270,43 @@ export function RescheduleRequestPanel({ enrollment }: RescheduleRequestPanelPro
                 <div className="rounded-lg border p-4">
                   <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                     <DetailItem label="Jadwal Saat Ini" value={formatDashboardDate(targetSession.startsAt)} />
-                    <DetailItem label="Selesai" value={formatDashboardDate(targetSession.endsAt)} />
-                    <DetailItem label="Teacher" value={targetSession.teacherName || '-'} />
+                    <DetailItem label="Pengajar Saat Ini" value={targetSession.teacherName || '-'} />
+                    <DetailItem label="Lokasi" value={`${targetSession.locationType} (${targetSession.locationLabel})`} />
                     <DetailItem label="Status Sesi" value={<SessionStatusBadge status={targetSession.status} />} />
                   </div>
                 </div>
               ) : null}
 
-              <div className="grid gap-4 lg:grid-cols-2">
-                <div className="rounded-lg border p-4">
-                  <p className="font-medium">Alasan siswa</p>
-                  <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">{request.reason || '-'}</p>
-                </div>
-                <div className="rounded-lg border p-4">
-                  <p className="font-medium">Pilihan jadwal</p>
-                  <div className="mt-3 space-y-2 text-sm text-muted-foreground">
-                    {request.preferredSlots.length > 0 ? request.preferredSlots.map((slot, index) => (
-                      <div key={`${slot.startsAt}-${index}`} className="rounded-md bg-muted/50 p-3">
-                        <p className="font-medium text-foreground">Opsi {index + 1}</p>
-                        <p>{formatDashboardDate(slot.startsAt)} - {slot.endsAt ? formatDashboardDate(slot.endsAt) : 'Tanpa jam selesai'}</p>
-                        {slot.note ? <p className="mt-1 whitespace-pre-line">{slot.note}</p> : null}
-                      </div>
-                    )) : (
-                      <p>Tidak ada pilihan jadwal.</p>
-                    )}
-                  </div>
+              <div className="space-y-2">
+                <p className="text-sm font-medium">Alasan siswa</p>
+                <div className="rounded-lg bg-muted/40 p-4 text-sm whitespace-pre-wrap">
+                  {request.reason || '-'}
                 </div>
               </div>
 
               {request.status === 'pending_admin_approval' ? (
-                <div className="space-y-5 rounded-lg border p-4">
+                <div className="space-y-4 rounded-lg border p-4">
+                  <p className="font-medium">Opsi jadwal persetujuan</p>
+
                   <div className="space-y-2">
-                    <Label htmlFor="preferred-slot">Sumber jadwal final</Label>
+                    <Label htmlFor="preferred-slot">Pilihan jadwal siswa</Label>
                     <Select value={selectedSlot} onValueChange={handlePreferredSlotChange}>
                       <SelectTrigger id="preferred-slot" className="w-full">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         {request.preferredSlots.map((slot, index) => (
-                          <SelectItem key={`${slot.startsAt}-${index}`} value={`${index}`}>
-                            Opsi jadwal {index + 1}
+                          <SelectItem key={`${slot.startsAt}-${index}`} value={String(index)}>
+                            Pilihan {index + 1}: {formatDashboardDate(slot.startsAt)}
+                            {slot.note ? ` (${slot.note})` : ''}
                           </SelectItem>
                         ))}
-                        <SelectItem value="custom">Jadwal custom</SelectItem>
+                        <SelectItem value="custom">Tentukan manual</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
 
-                  <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                  <div className="grid gap-4 sm:grid-cols-2">
                     <div className="space-y-2">
                       <Label htmlFor="reschedule-start-date">Tanggal mulai</Label>
                       <Input id="reschedule-start-date" type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} />
@@ -312,10 +323,34 @@ export function RescheduleRequestPanel({ enrollment }: RescheduleRequestPanelPro
                       <Label htmlFor="reschedule-end-time">Jam selesai</Label>
                       <Input id="reschedule-end-time" type="time" value={endTime} onChange={(event) => setEndTime(event.target.value)} />
                     </div>
+
+                    {/* Teacher strictly from Data Guru */}
                     <div className="space-y-2">
-                      <Label htmlFor="reschedule-teacher">Nama teacher</Label>
-                      <Input id="reschedule-teacher" value={teacherName} onChange={(event) => setTeacherName(event.target.value)} />
+                      <Label htmlFor="reschedule-teacher-select">Guru / Pengajar (Data Guru)</Label>
+                      <Select
+                        value={selectedTeacherId}
+                        onValueChange={setSelectedTeacherId}
+                        disabled={teachers.length === 0}
+                      >
+                        <SelectTrigger id="reschedule-teacher-select" className="w-full">
+                          <SelectValue placeholder="Pilih guru terdaftar..." />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {teachers.map((teacher) => (
+                            <SelectItem key={teacher.id} value={teacher.id}>
+                              {teacher.fullName} ({teacher.nickname || teacher.username || teacher.email})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      {selectedTeacher ? (
+                        <p className="flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400">
+                          <UserCheck className="h-3 w-3" />
+                          <span>Terhubung ke akun guru: {selectedTeacher.fullName}</span>
+                        </p>
+                      ) : null}
                     </div>
+
                     <div className="space-y-2">
                       <Label htmlFor="reschedule-location-type">Tipe lokasi</Label>
                       <Select value={locationType} onValueChange={(value) => setLocationType(value as ScheduleLocationType)}>
@@ -341,44 +376,32 @@ export function RescheduleRequestPanel({ enrollment }: RescheduleRequestPanelPro
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="reschedule-admin-note">Catatan Admin</Label>
+                    <Label htmlFor="reschedule-admin-note">Catatan admin (wajib)</Label>
                     <Textarea
                       id="reschedule-admin-note"
                       value={adminNote}
                       onChange={(event) => setAdminNote(event.target.value)}
-                      placeholder="Tuliskan catatan atau alasan keputusan untuk siswa..."
-                      rows={4}
+                      placeholder="Tulis alasan persetujuan atau penolakan jadwal"
+                      rows={3}
                     />
                   </div>
 
-                  {isPending ? (
-                    <div className="rounded-lg border bg-muted/40 px-4 py-3 text-sm text-muted-foreground">
-                      Memproses permintaan jadwal ulang...
-                    </div>
-                  ) : null}
-
-                  <div className="flex flex-col gap-2 sm:flex-row">
-                    <Button type="button" onClick={() => requestConfirmation('approve')} disabled={isPending}>
+                  <div className="flex flex-wrap gap-2">
+                    <Button
+                      type="button"
+                      onClick={() => setConfirmAction('approve')}
+                      disabled={isPending || !selectedTeacher}
+                    >
                       <CheckCircle2 className="mr-2 h-4 w-4" />
-                      Setujui Permintaan
+                      Setujui Reschedule
                     </Button>
-                    <Button type="button" variant="destructive" onClick={() => requestConfirmation('reject')} disabled={isPending}>
+                    <Button type="button" variant="destructive" onClick={() => setConfirmAction('reject')} disabled={isPending}>
                       <XCircle className="mr-2 h-4 w-4" />
-                      Tolak Permintaan
+                      Tolak Reschedule
                     </Button>
                   </div>
                 </div>
-              ) : (
-                <div className="rounded-lg border p-4">
-                  <p className="font-medium">Catatan review admin</p>
-                  <p className="mt-2 whitespace-pre-line text-sm text-muted-foreground">{request.adminNote || '-'}</p>
-                  {request.approvedSession ? (
-                    <p className="mt-3 text-sm text-muted-foreground">
-                      Jadwal disetujui: {formatDashboardDate(request.approvedSession.startsAt)} - {formatDashboardDate(request.approvedSession.endsAt)}
-                    </p>
-                  ) : null}
-                </div>
-              )}
+              ) : null}
             </>
           )}
         </CardContent>
@@ -388,16 +411,18 @@ export function RescheduleRequestPanel({ enrollment }: RescheduleRequestPanelPro
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>
-              {confirmAction === 'approve' ? 'Setujui permintaan jadwal?' : 'Tolak permintaan jadwal?'}
+              {confirmAction === 'approve' ? 'Setujui permohonan jadwal ini?' : 'Tolak permohonan jadwal ini?'}
             </AlertDialogTitle>
             <AlertDialogDescription>
-              Keputusan ini akan menyimpan hasil review dan mengembalikan status jadwal ke sudah diatur.
+              {confirmAction === 'approve'
+                ? `Jadwal sesi akan diperbarui dengan waktu yang ditentukan dan pengajar ${selectedTeacher?.fullName || ''}.`
+                : 'Permohonan akan ditolak dan siswa akan melihat catatan admin ini.'}
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel disabled={isPending}>Batal</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirm} disabled={isPending}>
-              Konfirmasi
+            <AlertDialogAction onClick={handleApplyAction} disabled={isPending}>
+              {confirmAction === 'approve' ? 'Setujui' : 'Tolak'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

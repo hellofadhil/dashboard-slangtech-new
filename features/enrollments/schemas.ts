@@ -26,6 +26,7 @@ const ScheduleSessionInputSchema = z
     startsAt: isoDateTime,
     endsAt: isoDateTime,
     timezone: z.string().trim().default(DEFAULT_TIMEZONE),
+    teacherId: optionalText,
     teacherName: requiredText('Nama teacher wajib diisi').max(120, 'Nama teacher maksimal 120 karakter'),
     locationType: z.enum(['online', 'offline'], 'Tipe lokasi tidak valid'),
     locationLabel: requiredText('Label lokasi wajib diisi').max(200, 'Label lokasi maksimal 200 karakter'),
@@ -84,6 +85,7 @@ export const ApproveRescheduleRequestSchema = z
     startsAt: isoDateTime,
     endsAt: isoDateTime,
     timezone: z.string().trim().default(DEFAULT_TIMEZONE),
+    teacherId: optionalText,
     teacherName: optionalText,
     locationType: z.enum(['online', 'offline']).optional(),
     locationLabel: optionalText,
@@ -114,3 +116,4 @@ export type RejectManualPaymentInput = z.infer<typeof RejectManualPaymentSchema>
 export type UpdateEnrollmentSessionStatusInput = z.infer<typeof UpdateEnrollmentSessionStatusSchema>;
 export type ApproveRescheduleRequestInput = z.infer<typeof ApproveRescheduleRequestSchema>;
 export type RejectRescheduleRequestInput = z.infer<typeof RejectRescheduleRequestSchema>;
+

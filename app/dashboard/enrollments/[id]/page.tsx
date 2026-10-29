@@ -22,6 +22,8 @@ import {
 import type { ClassEnrollment } from '@/lib/dashboard/types';
 import { formatDashboardDate, formatRupiah } from '@/lib/dashboard/utils';
 import { getClassEnrollmentById } from '@/features/enrollments/data';
+import { getTeachers } from '@/features/teachers/data';
+import { emptyTeachers, safelyLoad } from '@/lib/dashboard/safe-data';
 
 type EnrollmentDetailTab = 'overview' | 'payment' | 'schedule' | 'requests' | 'activity';
 
@@ -175,7 +177,10 @@ export default async function EnrollmentDetailPage({ params, searchParams }: Enr
   const { id } = await params;
   const parsedSearchParams = await searchParams;
   const activeTab = parseDetailTab(getParam(parsedSearchParams, 'tab'));
-  const enrollment = await getClassEnrollmentById(id);
+  const [enrollment, teachersResult] = await Promise.all([
+    getClassEnrollmentById(id),
+    safelyLoad(getTeachers, emptyTeachers),
+  ]);
 
   if (!enrollment) {
     notFound();
@@ -184,6 +189,7 @@ export default async function EnrollmentDetailPage({ params, searchParams }: Enr
   const student = enrollment.studentSnapshot;
   const classSnapshot = enrollment.classSnapshot;
   const activities = getActivityItems(enrollment);
+  const teachers = teachersResult.data;
 
   return (
     <div className="space-y-6">
@@ -248,11 +254,11 @@ export default async function EnrollmentDetailPage({ params, searchParams }: Enr
         </TabsContent>
 
         <TabsContent value="schedule">
-          <SchedulePanel enrollment={enrollment} />
+          <SchedulePanel enrollment={enrollment} teachers={teachers} />
         </TabsContent>
 
         <TabsContent value="requests">
-          <RescheduleRequestPanel enrollment={enrollment} />
+          <RescheduleRequestPanel enrollment={enrollment} teachers={teachers} />
         </TabsContent>
 
         <TabsContent value="activity">

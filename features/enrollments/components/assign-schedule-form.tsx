@@ -1,8 +1,9 @@
 'use client';
 
 import { type FormEvent, useEffect, useMemo, useState, useTransition } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { CalendarClock, Save } from 'lucide-react';
+import { AlertCircle, CalendarClock, Save, School, UserCheck } from 'lucide-react';
 import { toast } from 'sonner';
 import { assignEnrollmentScheduleAction } from '@/features/enrollments/actions';
 import {
@@ -43,6 +44,7 @@ import type {
   EnrollmentScheduleSession,
   ScheduleLocationType,
 } from '@/lib/dashboard/types';
+import type { Teacher } from '@/features/teachers/types';
 
 type ScheduleFrequency = 'daily' | 'weekly' | 'manual';
 
@@ -54,6 +56,7 @@ type ManualSlot = {
 
 interface AssignScheduleFormProps {
   enrollment: ClassEnrollment;
+  teachers?: Teacher[];
 }
 
 function getJakartaParts(iso: string): { date: string; time: string } {
@@ -172,6 +175,7 @@ function buildSessions({
   notes,
   startDate,
   startTime,
+  teacherId,
   teacherName,
   totalSessions,
 }: {
@@ -184,6 +188,7 @@ function buildSessions({
   notes: string;
   startDate: string;
   startTime: string;
+  teacherId?: string;
   teacherName: string;
   totalSessions: number;
 }): EnrollmentScheduleSession[] {
@@ -206,6 +211,7 @@ function buildSessions({
       startsAt,
       endsAt,
       timezone: DEFAULT_TIMEZONE,
+      teacherId,
       teacherName: teacherName.trim(),
       locationType,
       locationLabel: locationLabel.trim(),
@@ -216,8 +222,11 @@ function buildSessions({
   });
 }
 
-export function AssignScheduleForm({ enrollment }: AssignScheduleFormProps) {
-  const [teacherName, setTeacherName] = useState('');
+export function AssignScheduleForm({ enrollment, teachers = [] }: AssignScheduleFormProps) {
+  const firstTeacher = teachers.length > 0 ? teachers[0] : null;
+  const [selectedTeacherId, setSelectedTeacherId] = useState<string>(
+    firstTeacher ? firstTeacher.id : '',
+  );
   const [locationType, setLocationType] = useState<ScheduleLocationType>('online');
   const [locationLabel, setLocationLabel] = useState('Online Class');
   const [meetingUrl, setMeetingUrl] = useState('');
@@ -234,6 +243,15 @@ export function AssignScheduleForm({ enrollment }: AssignScheduleFormProps) {
   const [isPending, startTransition] = useTransition();
   const router = useRouter();
 
+  const selectedTeacher = useMemo(
+    () => teachers.find((t) => t.id === selectedTeacherId) ?? null,
+    [teachers, selectedTeacherId],
+  );
+
+  const teacherName = selectedTeacher
+    ? (selectedTeacher.fullName || selectedTeacher.nickname || selectedTeacher.email)
+    : '';
+
   useEffect(() => {
     setManualSlots((currentSlots) => normalizeManualSlots(currentSlots, totalSessions, startDate, startTime));
   }, [startDate, startTime, totalSessions]);
@@ -248,6 +266,7 @@ export function AssignScheduleForm({ enrollment }: AssignScheduleFormProps) {
     notes,
     startDate,
     startTime,
+    teacherId: selectedTeacher?.id,
     teacherName,
     totalSessions,
   }), [
@@ -260,6 +279,7 @@ export function AssignScheduleForm({ enrollment }: AssignScheduleFormProps) {
     notes,
     startDate,
     startTime,
+    selectedTeacher?.id,
     teacherName,
     totalSessions,
   ]);
@@ -273,8 +293,8 @@ export function AssignScheduleForm({ enrollment }: AssignScheduleFormProps) {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (!teacherName.trim()) {
-      toast.error('Nama teacher wajib diisi');
+    if (!selectedTeacher) {
+      toast.error('Pilih guru pengajar dari Data Guru terlebih dahulu');
       return;
     }
 
@@ -329,16 +349,58 @@ export function AssignScheduleForm({ enrollment }: AssignScheduleFormProps) {
           </div>
         </div>
 
-        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-          <div className="space-y-2">
-            <Label htmlFor="teacher-name">Nama Guru / Pengajar</Label>
-            <Input
-              id="teacher-name"
-              value={teacherName}
-              onChange={(event) => setTeacherName(event.target.value)}
-              placeholder="Nama guru pengajar"
-            />
+        {teachers.length === 0 ? (
+          <div className="rounded-xl border border-amber-300 bg-amber-50 p-4 dark:border-amber-900/60 dark:bg-amber-950/30">
+            <div className="flex items-start gap-3">
+              <AlertCircle className="mt-0.5 h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0" />
+              <div className="space-y-1">
+                <p className="text-sm font-semibold text-amber-900 dark:text-amber-200">
+                  Belum Ada Data Guru Terdaftar
+                </p>
+                <p className="text-xs text-amber-800 dark:text-amber-300">
+                  Penjadwalan wajib terhubung dengan akun guru resmi SlangTech. Silakan tambahkan data guru terlebih dahulu di menu Data Guru.
+                </p>
+                <div className="pt-2">
+                  <Button size="sm" variant="outline" asChild className="gap-1.5 text-xs border-amber-400 dark:border-amber-800">
+                    <Link href="/dashboard/teachers">
+                      <School className="h-3.5 w-3.5" />
+                      <span>Buka Menu Data Guru</span>
+                    </Link>
+                  </Button>
+                </div>
+              </div>
+            </div>
           </div>
+        ) : null}
+
+        <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+          {/* Guru Selection strictly from Data Guru */}
+          <div className="space-y-2">
+            <Label htmlFor="teacher-select">Guru / Pengajar (Data Guru)</Label>
+            <Select
+              value={selectedTeacherId}
+              onValueChange={setSelectedTeacherId}
+              disabled={teachers.length === 0}
+            >
+              <SelectTrigger id="teacher-select" className="w-full">
+                <SelectValue placeholder="Pilih guru terdaftar..." />
+              </SelectTrigger>
+              <SelectContent>
+                {teachers.map((teacher) => (
+                  <SelectItem key={teacher.id} value={teacher.id}>
+                    {teacher.fullName} ({teacher.nickname || teacher.username || teacher.email})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {selectedTeacher ? (
+              <p className="flex items-center gap-1 text-[11px] text-emerald-600 dark:text-emerald-400">
+                <UserCheck className="h-3 w-3" />
+                <span>Terhubung ke akun guru: {selectedTeacher.fullName}</span>
+              </p>
+            ) : null}
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="location-type">Tipe Lokasi</Label>
             <Select value={locationType} onValueChange={(value) => setLocationType(value as ScheduleLocationType)}>
@@ -351,6 +413,7 @@ export function AssignScheduleForm({ enrollment }: AssignScheduleFormProps) {
               </SelectContent>
             </Select>
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="location-label">Nama Tempat / Platform</Label>
             <Input
@@ -360,9 +423,10 @@ export function AssignScheduleForm({ enrollment }: AssignScheduleFormProps) {
               placeholder="Zoom / Google Meet / Classroom"
             />
           </div>
+
           {locationType === 'online' ? (
             <div className="space-y-2">
-            <Label htmlFor="meeting-url">Tautan Meeting (URL)</Label>
+              <Label htmlFor="meeting-url">Tautan Meeting (URL)</Label>
               <Input
                 id="meeting-url"
                 value={meetingUrl}
@@ -371,6 +435,7 @@ export function AssignScheduleForm({ enrollment }: AssignScheduleFormProps) {
               />
             </div>
           ) : null}
+
           <div className="space-y-2">
             <Label htmlFor="start-date">Tanggal mulai</Label>
             <Input
@@ -380,6 +445,7 @@ export function AssignScheduleForm({ enrollment }: AssignScheduleFormProps) {
               onChange={(event) => setStartDate(event.target.value)}
             />
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="start-time">Jam mulai</Label>
             <Input
@@ -389,6 +455,7 @@ export function AssignScheduleForm({ enrollment }: AssignScheduleFormProps) {
               onChange={(event) => setStartTime(event.target.value)}
             />
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="duration">Durasi per sesi</Label>
             <Input
@@ -399,6 +466,7 @@ export function AssignScheduleForm({ enrollment }: AssignScheduleFormProps) {
               onChange={(event) => setDurationMinutes(toPositiveInteger(event.target.value, durationMinutes))}
             />
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="total-sessions">Total sesi</Label>
             <Input
@@ -409,6 +477,7 @@ export function AssignScheduleForm({ enrollment }: AssignScheduleFormProps) {
               onChange={(event) => setTotalSessions(toPositiveInteger(event.target.value, totalSessions))}
             />
           </div>
+
           <div className="space-y-2">
             <Label htmlFor="frequency">Pola jadwal</Label>
             <Select value={frequency} onValueChange={(value) => setFrequency(value as ScheduleFrequency)}>
@@ -478,7 +547,15 @@ export function AssignScheduleForm({ enrollment }: AssignScheduleFormProps) {
           <div className="grid gap-2 md:grid-cols-2">
             {sessions.map((session) => (
               <div key={session.id} className="rounded-lg border p-3">
-                <p className="font-medium">{session.title}</p>
+                <div className="flex items-center justify-between">
+                  <p className="font-medium">{session.title}</p>
+                  {session.teacherName ? (
+                    <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-700 dark:bg-emerald-500/20 dark:text-emerald-300">
+                      <span className="h-1.5 w-1.5 rounded-full bg-emerald-500" />
+                      {session.teacherName}
+                    </span>
+                  ) : null}
+                </div>
                 <p className="mt-1 text-sm text-muted-foreground">
                   {formatScheduleDateTime(session.startsAt)} - {formatScheduleDateTime(session.endsAt)}
                 </p>
@@ -487,7 +564,7 @@ export function AssignScheduleForm({ enrollment }: AssignScheduleFormProps) {
           </div>
         </div>
 
-        <Button type="submit" disabled={isPending}>
+        <Button type="submit" disabled={isPending || teachers.length === 0}>
           <Save className="mr-2 h-4 w-4" />
           Simpan Jadwal
         </Button>
@@ -498,7 +575,7 @@ export function AssignScheduleForm({ enrollment }: AssignScheduleFormProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Simpan jadwal ini?</AlertDialogTitle>
             <AlertDialogDescription>
-              Jadwal enrollment akan diisi dengan {sessions.length} sesi otomatis dan status jadwal menjadi sudah diatur.
+              Jadwal enrollment akan diisi dengan {sessions.length} sesi belajar dengan pengajar {teacherName} dan status jadwal menjadi sudah diatur.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
