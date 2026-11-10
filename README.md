@@ -104,6 +104,22 @@ Bagian pengatur koneksi perpesanan otomatis:
 
 ---
 
+### Pola Arsitektur Serverless
+
+Aplikasi dashboard ini memanfaatkan ekosistem **Serverless** untuk menjaga keandalan dan keamanan data operasional:
+
+1. **Next.js Server Actions & Route Handlers**:
+   - Proses persetujuan pendaftaran, pengubahan jadwal, dan pengujian pesan WhatsApp dijalankan melalui *Server Actions* (`use server`) yang bersifat *stateless*.
+   - Kredensial rahasia (seperti API key Baselab, password SMTP, dan Firebase Service Account) terlindungi di sisi server tanpa pernah terekspos ke browser pengguna.
+2. **Basis Data & Cloud Storage Otomatis**:
+   - Google Cloud Firestore mengelola pencatatan data dan status transaksi secara serverless dengan kapasitas yang menyesuaikan kebutuhan secara dinamis.
+   - Cloudflare R2 menyajikan foto bukti bayar dan media promosi secara cepat melalui jaringan CDN global.
+3. **Manfaat bagi Tim Operasional**:
+   - **Sistem Selalu Siaga**: Dashboard dapat diakses 24/7 tanpa risiko server mati (*downtime*) akibat masalah perangkat keras lokal.
+   - **Keamanan Terisolasi**: Setiap aksi admin dieksekusi dalam sesi terenkripsi dengan otorisasi berbasis hak akses peran (*Role-Based Access Control*).
+
+---
+
 ### Integrasi API Eksternal
 
 | Layanan | Endpoint / Protokol | Digunakan Pada | Fungsi |
