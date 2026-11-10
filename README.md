@@ -108,6 +108,43 @@ Bagian pengatur koneksi perpesanan otomatis:
 
 Aplikasi dashboard ini memanfaatkan ekosistem **Serverless** untuk menjaga keandalan dan keamanan data operasional:
 
+```mermaid
+flowchart TD
+    Admin["Browser Pengelola (Staf / Admin)"]
+
+    subgraph ServerlessCompute ["Serverless Compute (Next.js Server Actions & API)"]
+        direction TB
+        ACT_Approve["approveManualPaymentAction<br/>(Verifikasi Pembayaran & Mutasi Status)"]
+        ACT_Schedule["assignEnrollmentSchedule<br/>(Penetapan Jadwal & Pengajar)"]
+        ACT_Media["/api/upload & Media Actions<br/>(Upload Banner Promosi ke R2)"]
+        ACT_WA["/api/whatsapp/test<br/>(Fitur Uji Coba Kirim Pesan)"]
+    end
+
+    subgraph ServerlessData ["Serverless Data & Object Storage"]
+        direction TB
+        Firestore[("Google Cloud Firestore<br/>(Data Transaksi, Kelas, & Pengguna)")]
+        R2[("Cloudflare R2 Storage<br/>(Bukti Transfer & Media Banner)")]
+    end
+
+    subgraph ManagedServices ["Layanan Eksternal Terkelola"]
+        direction TB
+        Auth["Firebase Authentication<br/>(Validasi Sesi Cookie Admin)"]
+        Baselab["Baselab WA Gateway<br/>(WhatsApp Konfirmasi Lunas)"]
+        SMTP["Hostinger Mail Server<br/>(Email Konfirmasi & Jadwal)"]
+    end
+
+    Admin -->|"Eksekusi Aksi Admin (Stateless)"| ServerlessCompute
+    Admin -->|"Verifikasi Sesi Login"| Auth
+
+    ACT_Approve -->|"Pembaruan Status: Terkonfirmasi"| Firestore
+    ACT_Approve -->|"Kirim Pesan WhatsApp Lunas"| Baselab
+    ACT_Approve -->|"Kirim Email Konfirmasi Lunas"| SMTP
+
+    ACT_Schedule -->|"Simpan Jadwal Belajar"| Firestore
+    ACT_Media -->|"Simpan Media Promosi"| R2
+    R2 -.->|"Tampilkan Bukti Bayar untuk Ditinjau"| Admin
+```
+
 1. **Next.js Server Actions & Route Handlers**:
    - Proses persetujuan pendaftaran, pengubahan jadwal, dan pengujian pesan WhatsApp dijalankan melalui *Server Actions* (`use server`) yang bersifat *stateless*.
    - Kredensial rahasia (seperti API key Baselab, password SMTP, dan Firebase Service Account) terlindungi di sisi server tanpa pernah terekspos ke browser pengguna.
